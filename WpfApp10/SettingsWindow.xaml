@@ -1,4 +1,4 @@
-﻿<Window x:Class="BroMessenger.SettingsWindow"
+﻿<Window x:Class="WpfApp10.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -80,16 +80,12 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="80"/>
                 </Grid.ColumnDefinitions>
-
                 <TextBlock Text="Уведомления" Grid.Column="0"/>
-
-                <ToggleButton x:Name="NotificationsToggle" 
-                            Grid.Column="1" 
-                            Width="40"
-                            Height="20"
-                            HorizontalAlignment="Right"
-                            Checked="NotificationsToggle_Checked"
-                            Unchecked="NotificationsToggle_Unchecked">
+                <ToggleButton Grid.Column="1"
+                              Width="40"
+                              Height="20"
+                              HorizontalAlignment="Right"
+                              IsChecked="{Binding NotificationsEnabled, Mode=TwoWay}">
                     <ToggleButton.Template>
                         <ControlTemplate TargetType="ToggleButton">
                             <Border x:Name="Border" 
@@ -120,17 +116,12 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="80"/>
                 </Grid.ColumnDefinitions>
-
                 <TextBlock Text="Темная тема" Grid.Column="0"/>
-
-                <ToggleButton x:Name="ThemeToggle" 
-                            Grid.Column="1" 
-                            Width="40"
-                            Height="20"
-                            HorizontalAlignment="Right"
-                            Checked="ThemeToggle_Checked"
-                            Unchecked="ThemeToggle_Unchecked"
-                            IsChecked="True">
+                <ToggleButton Grid.Column="1"
+                              Width="40"
+                              Height="20"
+                              HorizontalAlignment="Right"
+                              IsChecked="{Binding IsDarkTheme, Mode=TwoWay}">
                     <ToggleButton.Template>
                         <ControlTemplate TargetType="ToggleButton">
                             <Border x:Name="Border" 
@@ -156,27 +147,24 @@
             </Grid>
 
             <!-- Кнопка настроек профиля -->
-            <Button x:Name="ProfileSettingsButton" 
-                    Content="Настройки профиля" 
-                    Click="ProfileSettingsButton_Click"
+            <Button Content="Настройки профиля"
+                    Command="{Binding OpenProfileSettingsCommand}"
                     Margin="0,0,0,20"/>
         </StackPanel>
 
         <!-- Кнопка очистки истории -->
-        <Button Grid.Row="2" 
-                x:Name="ClearHistoryButton" 
-                Content="Очистить историю" 
+        <Button Grid.Row="2"
+                Content="Очистить историю"
                 Background="#FFD32F2F"
-                Click="ClearHistoryButton_Click"
+                Command="{Binding ClearHistoryCommand}"
                 Margin="10"/>
 
         <!-- Кнопка выхода -->
         <Border Grid.Row="3" Background="{DynamicResource ControlBackgroundBrush}" Padding="20">
-            <Button x:Name="LogoutButton" 
-                    Content="Выйти из аккаунта" 
+            <Button Content="Выйти из аккаунта"
                     Background="#FF1E6DD9"
-                    Click="LogoutButton_Click" 
-                    Margin="10,10,10,-4" 
+                    Command="{Binding LogoutCommand}"
+                    Margin="10,10,10,-4"
                     Cursor="Hand"/>
         </Border>
     </Grid>

@@ -58,12 +58,19 @@
     <Compile Include="AddChats.xaml.cs">
       <DependentUpon>AddChats.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AddChatsViewModel.cs" />
+    <Compile Include="AuthWindowViewModel.cs" />
+    <Compile Include="MainWindowViewModel.cs" />
+    <Compile Include="ObservableObject.cs" />
     <Compile Include="ProfileSettingsWindow.xaml.cs">
       <DependentUpon>ProfileSettingsWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ProfileSettingsViewModel.cs" />
+    <Compile Include="RelayCommand.cs" />
     <Compile Include="SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SettingsWindowViewModel.cs" />
     <Page Include="AddChats.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

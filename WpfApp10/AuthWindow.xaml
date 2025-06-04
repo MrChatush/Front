@@ -1,10 +1,7 @@
-﻿<Window x:Class="BroMessenger.AuthWindow"
+﻿<Window x:Class="WpfApp10.AuthWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:BroMessenger"
-        mc:Ignorable="d"
+        xmlns:local="clr-namespace:WpfApp10"
         Title="Авторизация" 
         Height="400" 
         Width="350"
@@ -77,30 +74,47 @@
                            Margin="0 0 0 20"
                            HorizontalAlignment="Center"/>
 
+                <!-- Username -->
                 <Grid Margin="0 0 0 15" Height="37">
-                    <TextBox x:Name="UsernameBox" Text="Имя пользователя" 
-                             Foreground="#FFAAAAAA" Margin="0"/>
-                    <TextBlock x:Name="UsernamePlaceholder" Text="Имя пользователя" 
-                               Foreground="#FFAAAAAA" Margin="10,8,0,0" 
+                    <TextBox x:Name="UsernameBox"
+                             Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                             Foreground="White"
+                             Margin="0"
+                             FontSize="14"
+                             Background="#FF2D2D2D"
+                             GotFocus="UsernameBox_GotFocus"
+                             LostFocus="UsernameBox_LostFocus"/>
+                    <TextBlock Text="Имя пользователя"
+                               Foreground="#FFAAAAAA"
+                               Margin="10,8,0,0"
                                IsHitTestVisible="False"
-                               Visibility="{Binding ElementName=UsernameBox, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                               Visibility="{Binding IsUsernamePlaceholderVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                 </Grid>
 
+                <!-- Password -->
                 <Grid Margin="0 0 0 15" Height="37">
-                    <PasswordBox x:Name="PasswordBox" Foreground="White"
-                                PasswordChar="•" Margin="0"
-                                PasswordChanged="PasswordBox_PasswordChanged"/>
-                    <TextBlock x:Name="PasswordPlaceholder" Text="Пароль" 
-                               Foreground="#FFAAAAAA" Margin="10,8,0,0" 
-                               IsHitTestVisible="False"/>
+                    <PasswordBox x:Name="PasswordBox"
+                                 Foreground="White"
+                                 Margin="0"
+                                 FontSize="14"
+                                 Background="#FF2D2D2D"
+                                 PasswordChanged="PasswordBox_PasswordChanged"
+                                 GotFocus="PasswordBox_GotFocus"
+                                 LostFocus="PasswordBox_LostFocus"/>
+                    <TextBlock Text="Пароль"
+                               Foreground="#FFAAAAAA"
+                               Margin="10,8,0,0"
+                               IsHitTestVisible="False"
+                               Visibility="{Binding IsPasswordPlaceholderVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                 </Grid>
             </StackPanel>
 
             <!-- Кнопка входа -->
             <Border Grid.Row="2" Background="#FF1A1A1A" CornerRadius="0 0 10 10" Padding="20">
-                <Button x:Name="LoginButton" Content="Продолжить" 
-                        Background="#FF1E6DD9" FontWeight="Bold"
-                        Click="LoginButton_Click"/>
+                <Button Content="Продолжить" 
+                        Background="#FF1E6DD9" 
+                        FontWeight="Bold"
+                        Command="{Binding LoginCommand}"/>
             </Border>
         </Grid>
     </Border>

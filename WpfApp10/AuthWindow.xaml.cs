@@ -1,71 +1,56 @@
-﻿using System.Windows;
+﻿using WpfApp10;
+using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
+using WpfApp10;
 
-namespace BroMessenger
+namespace WpfApp10
 {
     public partial class AuthWindow : Window
     {
+        private readonly AuthViewModel _viewModel;
+
         public AuthWindow()
         {
             InitializeComponent();
+            _viewModel = new AuthViewModel();
+            _viewModel.RequestClose += OnRequestClose;
+            DataContext = _viewModel;
+        }
 
-            // Обработчики для TextBox с именем пользователя
-            UsernameBox.GotFocus += (s, e) =>
-            {
-                if (UsernameBox.Text == "Имя пользователя")
-                {
-                    UsernameBox.Text = "";
-                    UsernameBox.Foreground = Brushes.White;
-                }
-            };
+        private void OnRequestClose()
+        {
+            MainWindow mainWindow = new MainWindow();
+            mainWindow.Show();
+            this.Close();
+        }
 
-            UsernameBox.LostFocus += (s, e) =>
-            {
-                if (string.IsNullOrWhiteSpace(UsernameBox.Text))
-                {
-                    UsernameBox.Text = "Имя пользователя";
-                    UsernameBox.Foreground = (Brush)new BrushConverter().ConvertFrom("#FFAAAAAA");
-                }
-            };
+        private void UsernameBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            _viewModel.UsernameGotFocus();
+        }
 
-            // Обработчики для PasswordBox
-            PasswordBox.GotFocus += (s, e) =>
-            {
-                PasswordBox.Foreground = Brushes.White;
-                PasswordPlaceholder.Visibility = Visibility.Collapsed;
-            };
+        private void UsernameBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            _viewModel.UsernameLostFocus();
+        }
 
-            PasswordBox.LostFocus += (s, e) =>
-            {
-                if (string.IsNullOrEmpty(PasswordBox.Password))
-                {
-                    PasswordBox.Foreground = (Brush)new BrushConverter().ConvertFrom("#FFAAAAAA");
-                    PasswordPlaceholder.Visibility = Visibility.Visible;
-                }
-            };
+        private void PasswordBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            _viewModel.PasswordGotFocus();
+        }
+
+        private void PasswordBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            _viewModel.PasswordLostFocus();
         }
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (PasswordBox.Password.Length > 0)
+            var passwordBox = sender as PasswordBox;
+            if (passwordBox != null)
             {
-                PasswordPlaceholder.Visibility = Visibility.Collapsed;
+                _viewModel.Password = passwordBox.Password;
             }
-            else
-            {
-                PasswordPlaceholder.Visibility = Visibility.Visible;
-            }
-        }
-
-        private void LoginButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Создаем и показываем MainWindow
-            MainWindow mainWindow = new MainWindow();
-            mainWindow.Show();
-
-            // Закрываем текущее окно авторизации
-            this.Close();
         }
     }
 }

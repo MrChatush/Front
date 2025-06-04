@@ -11,14 +11,15 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         WindowStyle="None"
-        AllowsTransparency="True">
+        AllowsTransparency="True"
+        Background="{DynamicResource WindowBackgroundBrush}">
     
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
         <Style TargetType="Button">
-            <Setter Property="Background" Value="#FF3A3A3A"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextForegroundBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="10 5"/>
             <Setter Property="Margin" Value="5"/>
@@ -27,8 +28,8 @@
         </Style>
 
         <Style TargetType="TextBox">
-            <Setter Property="Background" Value="#FF2D2D2D"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextForegroundBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="10"/>
             <Setter Property="Margin" Value="5"/>
@@ -44,45 +45,43 @@
             <Setter Property="FontSize" Value="14"/>
         </Style>
     </Window.Resources>
-    
-    <Border CornerRadius="10" Background="#FF1E1E1E">
+
+    <Border CornerRadius="10"
+        Background="{DynamicResource ControlBackgroundBrush}"
+        BorderBrush="Black"
+        BorderThickness="2">
         <Border.Effect>
             <DropShadowEffect BlurRadius="20" ShadowDepth="0" Color="Black" Opacity="0.5"/>
         </Border.Effect>
-        
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="60"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
-
-            <Border Grid.Row="0" Background="#FF1A1A1A" CornerRadius="10 10 0 0">
-                <TextBlock Text="Добавить чат" 
-                           Foreground="White" 
-                           FontSize="18" 
+            <Border Grid.Row="0" Background="{DynamicResource WindowBackgroundBrush}" CornerRadius="10 10 0 0">
+                <TextBlock Text="Добавить чат"
+                           Foreground="{DynamicResource TextForegroundBrush}"
+                           FontSize="18"
                            FontWeight="Bold"
-                           VerticalAlignment="Center" 
+                           VerticalAlignment="Center"
                            HorizontalAlignment="Center"/>
             </Border>
-
             <StackPanel Grid.Row="1" Margin="20" VerticalAlignment="Center">
-                <Grid Margin="0 0 0 15" Height="37">
-                    <TextBox x:Name="UsernameBox" Text="Имя пользователя" 
-                 Foreground="#FFAAAAAA" Margin="0"/>
-                    <TextBlock x:Name="UsernamePlaceholder" Text="Имя пользователя" 
-                   Foreground="#FFAAAAAA" Margin="10,8,0,0" 
-                   IsHitTestVisible="False"
-                   Visibility="{Binding ElementName=UsernameBox, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                </Grid>
+                <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" 
+                         Foreground="{DynamicResource TextForegroundBrush}" 
+                         Margin="0"
+                         FontSize="14"
+                         Background="#FF2D2D2D"/>
+                          
             </StackPanel>
-
-            <Border Grid.Row="2" Background="#FF1A1A1A" CornerRadius="0 0 10 10" Padding="5">
-                <Button x:Name="AddChatsButton" Content="Добавить" 
-                        Background="#FF1E6DD9" FontWeight="Bold"
-                        Click="AddChats_Click"/>
+            <Border Grid.Row="2" Background="{DynamicResource ControlBackgroundBrush}" CornerRadius="0 0 10 10" Padding="5">
+                <Button Content="Добавить"
+                        Foreground="{DynamicResource TextForegroundBrush}" 
+                        Command="{Binding AddChatsCommand}"
+                        Background="#FF1E6DD9"
+                        FontWeight="Bold"/>
             </Border>
-            
         </Grid>
     </Border>
 </Window>

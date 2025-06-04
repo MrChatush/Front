@@ -1,32 +1,15 @@
-﻿using BroMessenger;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿using System.Windows;
 
 namespace WpfApp10
 {
-    /// <summary>
-    /// Логика взаимодействия для AddChats.xaml
-    /// </summary>
     public partial class AddChats : Window
     {
         public AddChats()
         {
             InitializeComponent();
+            var vm = new AddChatsViewModel();
+            vm.RequestClose += () => this.Close();
+            DataContext = vm;
         }
-        private void AddChats_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        } 
     }
 }
