@@ -56,10 +56,38 @@
         <Border Grid.Column="0" Background="{DynamicResource ControlBackgroundBrush}">
             <DockPanel>
                 <!-- Заголовок -->
-                <Border DockPanel.Dock="Top" Background="{DynamicResource WindowBackgroundBrush}" Height="50">
+
+                <!--<Border DockPanel.Dock="Top" Background="{DynamicResource WindowBackgroundBrush}" Height="50">
                     <TextBlock Text="Чаты" Foreground="{DynamicResource TextForegroundBrush}" 
                                FontSize="18" FontWeight="Bold"
                                VerticalAlignment="Center" Margin="15 0"/>
+                </Border>-->
+
+                <Border DockPanel.Dock="Top" Background="{DynamicResource WindowBackgroundBrush}" Height="50">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Чаты" Foreground="{DynamicResource TextForegroundBrush}" 
+                            FontSize="18" FontWeight="Bold"
+                            VerticalAlignment="Center" Margin="15,0"/>
+                        <Button x:Name="AddButton" Grid.Column="1" Width="32" Height="32"
+                            VerticalAlignment="Center"
+                            Background="{DynamicResource WindowBackgroundBrush}"
+                            BorderThickness="0"
+                            Cursor="Hand" Click="AddButton_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Grid>
+                                        <Ellipse Fill="{TemplateBinding Background}"/>
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock Text="+" FontSize="30" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"  Foreground="{DynamicResource TextForegroundBrush}"/>
+                        </Button>
+                    </Grid>
                 </Border>
 
                 <!-- Поиск -->

@@ -3,6 +3,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Collections.ObjectModel;
 using System;
+using WpfApp10;
 
 namespace BroMessenger
 {
@@ -96,6 +97,13 @@ namespace BroMessenger
             SettingsWindow settingsWindow = new SettingsWindow();
             settingsWindow.Owner = this; // Устанавливаем главное окно как владельца
             settingsWindow.ShowDialog(); // Показываем как модальное окно
+        }
+
+        private void AddButton_Click(object sender, RoutedEventArgs e)
+        {
+            AddChats addChats = new AddChats();
+            addChats.Owner = this;
+            addChats.ShowDialog();
         }
     }
 }
