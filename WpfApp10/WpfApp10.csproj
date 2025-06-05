@@ -95,6 +95,7 @@
     <Compile Include="AddChatsViewModel.cs" />
     <Compile Include="AuthWindowViewModel.cs" />
     <Compile Include="MainWindowViewModel.cs" />
+    <Compile Include="Messages.cs" />
     <Compile Include="ObservableObject.cs" />
     <Compile Include="ProfileSettingsWindow.xaml.cs">
       <DependentUpon>ProfileSettingsWindow.xaml</DependentUpon>

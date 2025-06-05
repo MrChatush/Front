@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Runtime.Remoting.Messaging;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Net.Http.Json;
 
 
 namespace WpfApp10
@@ -93,6 +99,20 @@ namespace WpfApp10
             //    Alignment = HorizontalAlignment.Right
             //});
             //MessageText = "";
+        }
+        public async Task LoadMessagesAsync(int chatId, string token)
+        {
+             var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.GetAsync($"https://yourserver/api/messages?chatId={chatId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var messages = await response.Content.ReadFromJsonAsync<List<MessageDto>>();
+                Messages.Clear();
+                foreach (var msg in messages)
+                    Messages.Add(msg);
+            }
         }
     }
 }
