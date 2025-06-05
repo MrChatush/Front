@@ -11,7 +11,7 @@ namespace WpfApp10
     public class ProfileSettingsViewModel : INotifyPropertyChanged
     {
         private string _nickname = "Текущий никнейм";
-        private DateTime? _birthDate = DateTime.Now.AddYears(-20);
+        private string _password = "Текущий пароль";
         private BitmapImage _avatarImage;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -27,21 +27,19 @@ namespace WpfApp10
                     OnPropertyChanged();
                 }
             }
-        }
-
-        public DateTime? BirthDate
+        }  
+        public string Password
         {
-            get => _birthDate;
+            get => _password;
             set
             {
-                if (_birthDate != value)
+                if (_password != value)
                 {
-                    _birthDate = value;
+                    _password = value;
                     OnPropertyChanged();
                 }
             }
         }
-
         public BitmapImage AvatarImage
         {
             get => _avatarImage;

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Настройки профиля" 
-        Height="450" 
+        Height="400" 
         Width="400"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
@@ -104,7 +104,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
@@ -125,16 +125,20 @@
         <TextBlock Grid.Row="1" Text="Никнейм:"/>
         <TextBox Grid.Row="2" Text="{Binding Nickname, UpdateSourceTrigger=PropertyChanged}"/>
 
-        <!-- Дата рождения -->
-        <TextBlock Grid.Row="3" Text="Дата рождения:"/>
-        <DatePicker Grid.Row="4" SelectedDate="{Binding BirthDate, Mode=TwoWay}" Style="{StaticResource CustomDatePickerStyle}"/>
+        <!-- Пароль -->
+        <TextBlock Grid.Row="3" Text="Пароль:"/>
+        <TextBox Grid.Row="4" Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" 
+         Background="{DynamicResource ControlBackgroundBrush}"
+         Foreground="{DynamicResource TextForegroundBrush}"
+         BorderThickness="0"
+         Margin="0,0,0,20"/>
 
 
         <!-- Кнопка сохранения -->
         <Button Grid.Row="5" 
-                Content="Сохранить" 
-                HorizontalAlignment="Right"
-                Width="100"
-                Command="{Binding SaveCommand}" Cursor="Hand"/>
+        Content="Сохранить" 
+        HorizontalAlignment="Right"
+        Width="100"
+        Command="{Binding SaveCommand}" Cursor="Hand"/>
     </Grid>
 </Window>
