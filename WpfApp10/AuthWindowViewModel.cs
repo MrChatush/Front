@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Net.Http;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-
+using System.Net.Http.Json;
 namespace WpfApp10
 {
     public class AuthViewModel : INotifyPropertyChanged
@@ -12,7 +14,12 @@ namespace WpfApp10
         private string _password = string.Empty;
         private bool _isUsernameFocused;
         private bool _isPasswordFocused;
-
+        private string _token;
+        public string Token
+        {
+            get => _token;
+            set { _token = value; OnPropertyChanged(); }
+        }
         public event PropertyChangedEventHandler PropertyChanged;
 
         public string Username
@@ -50,11 +57,10 @@ namespace WpfApp10
         // Событие для закрытия окна
         public event Action RequestClose;
 
+
         public AuthViewModel()
         {
-            LoginCommand = new RelayCommand(_ => OnLogin(), _ => CanLogin());
-
-            // Можно инициализировать Username и Password, если нужно
+            LoginCommand = new RelayCommand(async _ => await OnLoginAsync(), _ => CanLogin());
         }
 
         private bool CanLogin()
@@ -64,13 +70,41 @@ namespace WpfApp10
                    && !string.IsNullOrEmpty(Password);
         }
 
-        private void OnLogin()
+        private async Task OnLoginAsync()
         {
-            // Здесь можно добавить логику авторизации
-            // Если успешна, закрываем окно и открываем главное
+            var client = new HttpClient();
+            var loginData = new { Username = this.Username, Password = this.Password };
 
-            RequestClose?.Invoke();
+            try
+            {
+                var response = await client.PostAsJsonAsync("https://localhost:7000/api/auth/login", loginData);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+                    Token = result.token;
+                    // Можно сохранить токен в сервис или статическое поле для дальнейших запросов
+                    RequestClose?.Invoke();
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show("Ошибка входа: " + error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка соединения: " + ex.Message);
+            }
         }
+
+        private class LoginResponse
+        {
+            public string token { get; set; }
+            public int userId { get; set; }
+            public string username { get; set; }
+        }
+
 
         // Методы для обработки фокуса в View через биндинг
         public void UsernameGotFocus()
