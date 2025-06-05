@@ -10,7 +10,8 @@ namespace WpfApp10
         public RegistrationWindow()
         {
             InitializeComponent();
-            _viewModel = new RegistrationWindowViewModel();
+            ApiAuthService api = new ApiAuthService();
+            _viewModel = new RegistrationWindowViewModel(api);
             _viewModel.RequestClose += OnRequestClose;
             DataContext = _viewModel;
         }
