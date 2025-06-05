@@ -52,7 +52,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="60"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="80"/>
+                <RowDefinition Height="130"/>
             </Grid.RowDefinitions>
 
             <!-- Заголовок -->
@@ -109,13 +109,21 @@
                 </Grid>
             </StackPanel>
 
-            <!-- Кнопка входа -->
+            <!-- Кнопка входа и регистрации -->
             <Border Grid.Row="2" Background="#FF1A1A1A" CornerRadius="0 0 10 10" Padding="20">
-                <Button Content="Продолжить" 
-                        Background="#FF1E6DD9" 
-                        FontWeight="Bold"
-                        Command="{Binding LoginCommand}"/>
+                <StackPanel>
+                    <Button Content="Продолжить" 
+                Background="#FF1E6DD9" 
+                FontWeight="Bold"
+                Command="{Binding LoginCommand}"/>
+                    <Button Content="Регистрация"
+                Background="#FF3A3A3A"
+                Foreground="White"
+                FontWeight="Normal"
+                Command="{Binding RegisterCommand}"/>
+                </StackPanel>
             </Border>
+
         </Grid>
     </Border>
 </Window>

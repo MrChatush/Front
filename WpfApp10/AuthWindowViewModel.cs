@@ -10,6 +10,9 @@ namespace WpfApp10
 {
     public class AuthViewModel : INotifyPropertyChanged
     {
+        public ICommand RegisterCommand { get; }
+        public event Action RequestRegister;
+
         private string _username = "Имя пользователя";
         private string _password = string.Empty;
         private bool _isUsernameFocused;
@@ -61,6 +64,12 @@ namespace WpfApp10
         public AuthViewModel()
         {
             LoginCommand = new RelayCommand(async _ => await OnLoginAsync(), _ => CanLogin());
+            RegisterCommand = new RelayCommand(_ => OnRegister());
+        }
+
+        private void OnRegister()
+        {
+            RequestRegister?.Invoke();
         }
 
         private bool CanLogin()

@@ -14,7 +14,15 @@ namespace WpfApp10
             InitializeComponent();
             _viewModel = new AuthViewModel();
             _viewModel.RequestClose += OnRequestClose;
+            _viewModel.RequestRegister += OnRequestRegister; // добавьте эту строку
             DataContext = _viewModel;
+        }
+
+        private void OnRequestRegister()
+        {
+            var regWindow = new RegistrationWindow();
+            regWindow.Show();
+            this.Close();
         }
 
         private void OnRequestClose()
@@ -51,6 +59,11 @@ namespace WpfApp10
             {
                 _viewModel.Password = passwordBox.Password;
             }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
