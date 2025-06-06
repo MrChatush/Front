@@ -49,8 +49,6 @@
                             </Button.Template>
                             <TextBlock Text="+" FontSize="30" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"  Foreground="{DynamicResource TextForegroundBrush}"/>
                         </Button>
-                        <Button Content="Обновить" Command="{Binding LoadChatsCommand}" Margin="228,9,10,11" Width="30" />
-
                     </Grid>
                 </Border>
 

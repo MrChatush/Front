@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.ObjectModel;
+using System.Data;
+using System.Data.Common;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
@@ -87,6 +89,7 @@ namespace WpfApp10
             LoadChatsCommand = new RelayCommand(async _ => await LoadChatsAsync());
             OpenSettingsCommand = new RelayCommand(_ => OpenSettings());
             AddChatCommand = new RelayCommand(_ => AddChat());
+            _ = LoadChatsAsync();
         }
 
         private void OpenSettings()
@@ -137,6 +140,13 @@ namespace WpfApp10
                         Messages.Add(message);
                     });
                 }
+            });
+            _hubConnection.On<ChatDto>("NewChatCreated", chat => {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _ = LoadChatsAsync();
+                });
+               
             });
 
             try
@@ -203,7 +213,7 @@ namespace WpfApp10
 
         private void AddChat()
         {
-            var win = new AddChats();
+            var win = new AddChats(_hubConnection, _httpClient, _token);
             win.ShowDialog();
         }
         private async Task JoinChatAsync(int chatId)
@@ -225,33 +235,33 @@ namespace WpfApp10
                 MessageBox.Show("Ошибка при загрузке сообщений или присоединении к чату: " + ex.Message);
             }
         }
-        private async Task ConnectToHubAsync()
-        {
-            _hubConnection = new HubConnectionBuilder().WithUrl("https://localhost:7000/chat", options =>
-            {
-                    options.AccessTokenProvider = () => Task.FromResult(Token);
-                }).WithAutomaticReconnect().Build();
+        //private async Task ConnectToHubAsync()
+        //{
+        //    _hubConnection = new HubConnectionBuilder().WithUrl("https://localhost:7000/chat", options =>
+        //    {
+        //            options.AccessTokenProvider = () => Task.FromResult(Token);
+        //        }).WithAutomaticReconnect().Build();
 
-            //_hubConnection.On<MessageDto>("ReceiveMessage", message =>
-            //{
-            //    if (SelectedChat != null && message.ChatId == SelectedChat.Id)
-            //    {
-            //        Application.Current.Dispatcher.Invoke(() =>
-            //        {
-            //            Messages.Add(message);
-            //        });
-            //    }
-            //});
+        //    //_hubConnection.On<MessageDto>("ReceiveMessage", message =>
+        //    //{
+        //    //    if (SelectedChat != null && message.ChatId == SelectedChat.Id)
+        //    //    {
+        //    //        Application.Current.Dispatcher.Invoke(() =>
+        //    //        {
+        //    //            Messages.Add(message);
+        //    //        });
+        //    //    }
+        //    //});
 
-            try
-            {
-                await _hubConnection.StartAsync();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка подключения к SignalR: " + ex.Message);
-            }
-        }
+        //    try
+        //    {
+        //        await _hubConnection.StartAsync();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show("Ошибка подключения к SignalR: " + ex.Message);
+        //    }
+        //}
 
         private async Task SendMessageAsync()
         {

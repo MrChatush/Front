@@ -13,7 +13,7 @@
         WindowStyle="None"
         AllowsTransparency="True"
         Background="{DynamicResource WindowBackgroundBrush}">
-    
+
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
@@ -66,14 +66,16 @@
                            FontWeight="Bold"
                            VerticalAlignment="Center"
                            HorizontalAlignment="Center"/>
+
             </Border>
+
             <StackPanel Grid.Row="1" Margin="20" VerticalAlignment="Center">
                 <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" 
                          Foreground="{DynamicResource TextForegroundBrush}" 
                          Margin="0"
                          FontSize="14"
                          Background="#FF2D2D2D"/>
-                          
+
             </StackPanel>
             <Border Grid.Row="2" Background="{DynamicResource ControlBackgroundBrush}" CornerRadius="0 0 10 10" Padding="5">
                 <Button Content="Добавить"
@@ -82,6 +84,21 @@
                         Background="#FF1E6DD9"
                         FontWeight="Bold"/>
             </Border>
+            <Button Width="32" Height="32" Command="{Binding AddChatCommand}"
+                                VerticalAlignment="Top"
+                                Background="{DynamicResource WindowBackgroundBrush}"
+                                BorderThickness="0"
+                                Cursor="Hand" Margin="304,2,10,0" Click="Button_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Ellipse Fill="{TemplateBinding Background}"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Button.Template>
+                <TextBlock Text="x" FontSize="30" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"  Foreground="{DynamicResource TextForegroundBrush}"/>
+            </Button>
         </Grid>
     </Border>
 </Window>

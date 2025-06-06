@@ -71,8 +71,8 @@ namespace WpfApp10
 
                 if (response.IsSuccessStatusCode)
                 {
-                    //var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
-                    //Token = result.token;
+                    var result = await response.Content.ReadFromJsonAsync<LoginReponse>();
+                    Token = result.token;
                     // Можно сохранить токен в сервис или статическое поле для дальнейших запросов
                     TokenReceived?.Invoke(Token);
                     RequestClose?.Invoke();
@@ -88,7 +88,12 @@ namespace WpfApp10
                 MessageBox.Show("Ошибка соединения: " + ex.Message);
             }
         }
-
+        private class LoginReponse
+        {
+            public string token { get; set; }
+            public int userId { get; set; }
+            public string username { get; set; }
+        }
         private void ChangeAvatar()
         {
             // Открытие диалога выбора файла и установка аватара
