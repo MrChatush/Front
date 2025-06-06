@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
@@ -17,10 +18,18 @@ namespace WpfApp10
 
         private string _username;
         private string _password;
-        private BitmapImage _avatar;
+        private string _avatarFilePath;
         public event PropertyChangedEventHandler PropertyChanged;
         public event Action RequestClose;
         private string _token;
+        private object AvatarFile;
+        private BitmapImage _avatar;
+
+        public string AvatarFilePath
+        {
+            get => _avatarFilePath;
+            set { _avatarFilePath = value; OnPropertyChanged(); }
+        }
         public string Token
         {
             get => _token;
@@ -61,19 +70,29 @@ namespace WpfApp10
 
         private async Task Register()
         {
-
             var client = new HttpClient();
-            var loginData = new { Username = this.Username, Password = this.Password };
 
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:7000/api/auth/register", loginData);
+                var content = new MultipartFormDataContent();
+
+;
+
+                if (!string.IsNullOrEmpty(AvatarFilePath) && File.Exists(AvatarFilePath))
+                {
+                    var fileStream = File.OpenRead(AvatarFilePath);
+                    var fileContent = new StreamContent(fileStream);
+                    fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg"); // или определите тип по расширению
+                    content.Add(fileContent, "Avatar", Path.GetFileName(AvatarFilePath));
+                }
+                content.Add(new StringContent(this.Username), "Username");
+                content.Add(new StringContent(this.Password), "Password");
+                var response = await client.PostAsync("https://localhost:7000/api/auth/register", content);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadFromJsonAsync<LoginReponse>();
                     Token = result.token;
-                    // Можно сохранить токен в сервис или статическое поле для дальнейших запросов
                     TokenReceived?.Invoke(Token);
                     RequestClose?.Invoke();
                 }
@@ -88,6 +107,7 @@ namespace WpfApp10
                 MessageBox.Show("Ошибка соединения: " + ex.Message);
             }
         }
+
         private class LoginReponse
         {
             public string token { get; set; }
@@ -96,14 +116,14 @@ namespace WpfApp10
         }
         private void ChangeAvatar()
         {
-            // Открытие диалога выбора файла и установка аватара
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
                 Filter = "Image files (*.png;*.jpg)|*.png;*.jpg"
             };
             if (openFileDialog.ShowDialog() == true)
             {
-                Avatar = new BitmapImage(new Uri(openFileDialog.FileName));
+                AvatarFilePath = openFileDialog.FileName;
+                Avatar = new BitmapImage(new Uri(AvatarFilePath));
             }
         }
 

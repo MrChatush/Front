@@ -13,7 +13,7 @@ namespace WpfApp10
             DataContext = new MainWindowViewModel(Token);
 
             Loaded += MainWindow_Loaded;
-        }
+            }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {

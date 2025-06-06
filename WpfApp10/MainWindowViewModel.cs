@@ -1,5 +1,4 @@
-﻿
-using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using System;
@@ -61,7 +60,7 @@ namespace WpfApp10
             }
         }
 
-        private string _currentChatName = "1";
+        private string _currentChatName = "";
         public string CurrentChatName
         {
             get => _currentChatName;
@@ -73,6 +72,12 @@ namespace WpfApp10
         {
             get => _messageText;
             set { _messageText = value; OnPropertyChanged();}
+        }
+        private string _senderAvatarUrl;
+        public string SenderAvatarUrl
+        {
+            get => _senderAvatarUrl;
+            set { _senderAvatarUrl = value; OnPropertyChanged(); }
         }
 
         public ICommand OpenSettingsCommand { get; }
@@ -235,33 +240,6 @@ namespace WpfApp10
                 MessageBox.Show("Ошибка при загрузке сообщений или присоединении к чату: " + ex.Message);
             }
         }
-        //private async Task ConnectToHubAsync()
-        //{
-        //    _hubConnection = new HubConnectionBuilder().WithUrl("https://localhost:7000/chat", options =>
-        //    {
-        //            options.AccessTokenProvider = () => Task.FromResult(Token);
-        //        }).WithAutomaticReconnect().Build();
-
-        //    //_hubConnection.On<MessageDto>("ReceiveMessage", message =>
-        //    //{
-        //    //    if (SelectedChat != null && message.ChatId == SelectedChat.Id)
-        //    //    {
-        //    //        Application.Current.Dispatcher.Invoke(() =>
-        //    //        {
-        //    //            Messages.Add(message);
-        //    //        });
-        //    //    }
-        //    //});
-
-        //    try
-        //    {
-        //        await _hubConnection.StartAsync();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show("Ошибка подключения к SignalR: " + ex.Message);
-        //    }
-        //}
 
         private async Task SendMessageAsync()
         {
@@ -288,6 +266,7 @@ namespace WpfApp10
             public int Id { get; set; }
             public string Name { get; set; }
             public bool IsGroup { get; set; }
+            public string SenderAvatarUrl { get; set; }
         }
 
         public class MessageDto
@@ -295,6 +274,7 @@ namespace WpfApp10
             public int Id { get; set; }
             public int ChatId { get; set; }
             public int SenderId { get; set; }
+            public string SenderAvatarUrl { get; set; }
             public string Text { get; set; }
             public DateTime SentAt { get; set; }
             public bool IsRead { get; set; }
