@@ -1,7 +1,6 @@
 ﻿using WpfApp10;
 using System.Windows;
 using System.Windows.Controls;
-using WpfApp10;
 
 namespace WpfApp10
 {
@@ -15,6 +14,7 @@ namespace WpfApp10
             _viewModel = new AuthViewModel();
             _viewModel.RequestClose += OnRequestClose;
             _viewModel.RequestRegister += OnRequestRegister; // добавьте эту строку
+            
             DataContext = _viewModel;
         }
 
@@ -27,7 +27,7 @@ namespace WpfApp10
 
         private void OnRequestClose()
         {
-            MainWindow mainWindow = new MainWindow();
+            MainWindow mainWindow = new MainWindow(_viewModel.Token);
             mainWindow.Show();
             this.Close();
         }

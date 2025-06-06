@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.ComponentModel;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -19,7 +20,12 @@ namespace WpfApp10
         private BitmapImage _avatar;
         public event PropertyChangedEventHandler PropertyChanged;
         public event Action RequestClose;
-
+        private string _token;
+        public string Token
+        {
+            get => _token;
+            set { _token = value; OnPropertyChanged(); }
+        }
         public string Username
         {
             get => _username;
@@ -41,6 +47,7 @@ namespace WpfApp10
         public ICommand RegisterCommand { get; }
         public ICommand ChangeAvatarCommand { get; }
 
+        public event Action<string> TokenReceived;
         public RegistrationWindowViewModel(ApiAuthService authService)
         {
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
@@ -54,19 +61,6 @@ namespace WpfApp10
 
         private async Task Register()
         {
-            //try
-            //{
-            //    var response = await _authService.RegisterAsync(Username, Password);
-            //    var loginResult = await _authService.LoginAsync(Username, Password);
-
-            //    // Сохранение токена
-            //    Application.Current.Properties["JwtToken"] = loginResult.Token;
-            //    RequestClose?.Invoke();
-            //}
-            //catch (HttpRequestException ex)
-            //{
-            //    MessageBox.Show("Ошибка входа: " + ex);
-            //}
 
             var client = new HttpClient();
             var loginData = new { Username = this.Username, Password = this.Password };
@@ -80,6 +74,7 @@ namespace WpfApp10
                     //var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
                     //Token = result.token;
                     // Можно сохранить токен в сервис или статическое поле для дальнейших запросов
+                    TokenReceived?.Invoke(Token);
                     RequestClose?.Invoke();
                 }
                 else

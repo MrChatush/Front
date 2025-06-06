@@ -1,5 +1,15 @@
-﻿using System;
+﻿
+using Microsoft.AspNetCore.SignalR.Client;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.ObjectModel;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Runtime.Remoting.Messaging;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -9,24 +19,56 @@ namespace WpfApp10
 {
     public class MainWindowViewModel : ObservableObject // ObservableObject реализует INotifyPropertyChanged (можно реализовать вручную)
     {
-        //public ObservableCollection<ChatItem> Chats { get; set; }
-        //public ObservableCollection<Message> Messages { get; set; }
+        private  HttpClient _httpClient;
+        private HubConnection _hubConnection;
 
-        //private Avatar _currentChatAvatar;
-        //public Avatar CurrentChatAvatar
-        //{
-        //    get => _currentChatAvatar;
-        //    set { _currentChatAvatar = value; OnPropertyChanged(); }
-        //}
+        public ObservableCollection<ChatDto> Chats { get; } = new ObservableCollection<ChatDto>();
+        public ObservableCollection<MessageDto> Messages { get; } = new ObservableCollection<MessageDto>();
 
-        private string _currentChatName = "Сережа";
+        private ChatDto _selectedChat;
+        public ChatDto SelectedChat
+        {
+            get => _selectedChat;
+            set
+            {
+                if (_selectedChat != value)
+                {
+                    _selectedChat = value;
+                    OnPropertyChanged();
+                    if (_selectedChat != null)
+                        
+                        _ = ReconnectSignalRAsync();
+                        _ = ConnectToHubAsync();
+                        _ = JoinChatAsync(_selectedChat.Id);
+
+                }
+            }
+        }
+
+        private string _token;
+        public string Token
+        {
+            get => _token;
+            set
+            {
+                if (_token != value)
+                {
+                    _token = value;
+                    OnPropertyChanged();
+                    UpdateHttpClientAuthorization();
+                    _ = ReconnectSignalRAsync();
+                }
+            }
+        }
+
+        private string _currentChatName = "1";
         public string CurrentChatName
         {
             get => _currentChatName;
             set { _currentChatName = value; OnPropertyChanged(); }
         }
 
-        private string _messageText = "";
+        private string _messageText = "1";
         public string MessageText
         {
             get => _messageText;
@@ -36,40 +78,19 @@ namespace WpfApp10
         public ICommand OpenSettingsCommand { get; }
         public ICommand AddChatCommand { get; }
         public ICommand SendMessageCommand { get; }
+        public ICommand LoadChatsCommand { get; }
 
-        public MainWindowViewModel()
+        public MainWindowViewModel(string token)
         {
-            // Загрузка аватарок
-            //var avatar1 = new Avatar { ImageSource = new BitmapImage(new Uri("pack://application:,,,/Resources/Avatar2.png")) };
-            //var avatar2 = new Avatar { ImageSource = new BitmapImage(new Uri("pack://application:,,,/Resources/Avatar2.png")) };
-            //var avatar3 = new Avatar { ImageSource = new BitmapImage(new Uri("pack://application:,,,/Resources/Avatar2.png")) };
-            //var avatar4 = new Avatar { ImageSource = new BitmapImage(new Uri("pack://application:,,,/Resources/Avatar2.png")) };
-            //var avatar5 = new Avatar { ImageSource = new BitmapImage(new Uri("pack://application:,,,/Resources/Avatar2.png")) };
-
-            // Инициализация чатов
-            //Chats = new ObservableCollection<ChatItem>
-            //{
-            //    new ChatItem { Name = "Максим", LastMessage = "Привет, как дела?", Time = "12:30", IsOnline = false, Avatar = avatar1 },
-            //    new ChatItem { Name = "Сережа", LastMessage = "Давай встретимся", Time = "10:15", IsOnline = true, Avatar = avatar2 },
-            //    new ChatItem { Name = "Саня", LastMessage = "Не забудь купить пиво", Time = "Вчера", IsOnline = true, Avatar = avatar3 },
-            //    new ChatItem { Name = "Семён", LastMessage = "Посмотри это видео", Time = "Пн", IsOnline = false, Avatar = avatar4 },
-            //    new ChatItem { Name = "КУКУРУЗА", LastMessage = "По работе вопрос", Time = "21.05", IsOnline = true, Avatar = avatar5 }
-            //};
-
-            //CurrentChatAvatar = avatar1;
-
-            // Инициализация сообщений
-            //Messages = new ObservableCollection<Message>
-            //{
-            //    new Message { Text = "Ты как", SenderAvatar = avatar2, Alignment = HorizontalAlignment.Left },
-            //    new Message { Text = "Норм", SenderAvatar = avatar1, Alignment = HorizontalAlignment.Right },
-            //    new Message { Text = "Давай встретимся", SenderAvatar = avatar2, Alignment = HorizontalAlignment.Left }
-            //};
-
-            // Команды
+            InitializeHttpClient();
+            Token = token;
+            UpdateHttpClientAuthorization();
+            SendMessageCommand = new RelayCommand(async _ => await SendMessageAsync(), _ => !string.IsNullOrWhiteSpace(MessageText));
+            LoadChatsCommand = new RelayCommand(async _ => await LoadChatsAsync());
             OpenSettingsCommand = new RelayCommand(_ => OpenSettings());
             AddChatCommand = new RelayCommand(_ => AddChat());
-            SendMessageCommand = new RelayCommand(_ => SendMessage(), _ => !string.IsNullOrWhiteSpace(MessageText));
+
+
         }
 
         private void OpenSettings()
@@ -77,22 +98,196 @@ namespace WpfApp10
             var win = new SettingsWindow();
             win.ShowDialog();
         }
+        private void UpdateHttpClientAuthorization()
+        {
+            if (!string.IsNullOrEmpty(Token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+            }
+            else
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = null;
+            }
+        }
+        private void InitializeHttpClient()
+        {
+            _httpClient = new HttpClient
+            {
+                BaseAddress = new Uri("https://localhost:7000/")
+            };
+        }
+
+        public async Task ReconnectSignalRAsync()
+        {
+            if (_hubConnection != null)
+            {
+                await _hubConnection.StopAsync();
+                await _hubConnection.DisposeAsync();
+            }
+
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl("https://localhost:7000/chat", options =>
+                {
+                    options.AccessTokenProvider = () => Task.FromResult(Token);
+                })
+                .WithAutomaticReconnect()
+                .Build();
+
+            _hubConnection.On<MessageDto>("ReceiveMessage", message =>
+            {
+                if (SelectedChat != null && message.ChatId == SelectedChat.Id)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        Messages.Add(message);
+                    });
+                }
+            });
+
+            try
+            {
+                await _hubConnection.StartAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка подключения к SignalR: " + ex.Message);
+            }
+        }
+
+        public async Task LoadChatsAsync()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(Token))
+                {
+                    MessageBox.Show("Токен не установлен. Пожалуйста, выполните вход.");
+                    return;
+                }
+
+                int userId = GetUserIdFromToken(Token); // Реализуйте метод для получения userId из токена
+
+                var chats = await _httpClient.GetFromJsonAsync<ChatDto[]>($"api/chats?userId={userId}");
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Chats.Clear();
+                    foreach (var chat in chats)
+                        Chats.Add(chat);
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка загрузки чатов: " + ex.Message);
+            }
+        }
+
+        private int GetUserIdFromToken(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                return 0;
+
+            var handler = new JwtSecurityTokenHandler();
+
+            try
+            {
+                var jwtToken = handler.ReadJwtToken(token);
+                // Ищем клейм с типом "userId"
+                var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId");
+
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    return userId;
+                }
+            }
+            catch
+            {
+                // Ошибка при парсинге токена
+            }
+
+            return 0; // Возвращаем 0, если не удалось извлечь userId
+        }
 
         private void AddChat()
         {
             var win = new AddChats();
             win.ShowDialog();
         }
-
-        private void SendMessage()
+        private async Task JoinChatAsync(int chatId)
         {
-            //Messages.Add(new Message
-            //{
-            //    Text = MessageText,
-            //    SenderAvatar = CurrentChatAvatar,
-            //    Alignment = HorizontalAlignment.Right
-            //});
-            //MessageText = "";
+            try
+            {
+                var messages = await _httpClient.GetFromJsonAsync<MessageDto[]>($"api/messages?chatId={chatId}");
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Messages.Clear();
+                    foreach (var msg in messages)
+                        Messages.Add(msg);
+                });
+
+                await _hubConnection.InvokeAsync("JoinRoom", chatId);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при загрузке сообщений или присоединении к чату: " + ex.Message);
+            }
+        }
+        private async Task ConnectToHubAsync()
+        {
+            _hubConnection = new HubConnectionBuilder().WithUrl("https://localhost:7000/chat", options =>
+            {
+                    options.AccessTokenProvider = () => Task.FromResult(Application.Current.Resources["JwtToken"] as string);
+                }).WithAutomaticReconnect().Build();
+
+            _hubConnection.On<MessageDto>("ReceiveMessage", message =>
+            {
+                if (SelectedChat != null && message.ChatId == SelectedChat.Id)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        Messages.Add(message);
+                    });
+                }
+            });
+
+            try
+            {
+                await _hubConnection.StartAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка подключения к SignalR: " + ex.Message);
+            }
+        }
+
+        private async Task SendMessageAsync()
+        {
+            if (SelectedChat == null || string.IsNullOrWhiteSpace(MessageText))
+                return;
+
+            try
+            {
+                await _hubConnection.InvokeAsync("SendMessageViaSignalRAsync", SelectedChat.Id, MessageText);
+                MessageText = string.Empty;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка отправки сообщения: " + ex.Message);
+            }
+        }
+        public class ChatDto
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public bool IsGroup { get; set; }
+        }
+
+        public class MessageDto
+        {
+            public int Id { get; set; }
+            public int ChatId { get; set; }
+            public int SenderId { get; set; }
+            public string Text { get; set; }
+            public DateTime SentAt { get; set; }
+            public bool IsRead { get; set; }
         }
     }
 }

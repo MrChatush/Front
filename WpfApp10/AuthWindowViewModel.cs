@@ -10,6 +10,8 @@ namespace WpfApp10
 {
     public class AuthViewModel : INotifyPropertyChanged
     {
+        public event Action<string> TokenReceived;
+
         public ICommand RegisterCommand { get; }
         public event Action RequestRegister;
 
@@ -65,6 +67,7 @@ namespace WpfApp10
         {
             LoginCommand = new RelayCommand(async _ => await OnLoginAsync(), _ => CanLogin());
             RegisterCommand = new RelayCommand(_ => OnRegister());
+
         }
 
         private void OnRegister()
@@ -91,6 +94,7 @@ namespace WpfApp10
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+                    TokenReceived?.Invoke(Token);
                     Token = result.token;
                     // Можно сохранить токен в сервис или статическое поле для дальнейших запросов
                     RequestClose?.Invoke();
@@ -106,6 +110,7 @@ namespace WpfApp10
                 MessageBox.Show("Ошибка соединения: " + ex.Message);
             }
         }
+
 
         private class LoginResponse
         {

@@ -13,5 +13,6 @@ namespace WpfApp10
     /// </summary>
     public partial class App : Application
     {
+
     }
 }

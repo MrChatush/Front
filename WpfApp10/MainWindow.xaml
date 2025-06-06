@@ -12,38 +12,7 @@
         Background="{DynamicResource WindowBackgroundBrush}">
 
     <Window.Resources>
-        <Style TargetType="Button">
-            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextForegroundBrush}"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="10 5"/>
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-
-        <Style TargetType="TextBox">
-            <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextForegroundBrush}"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="Margin" Value="5"/>
-        </Style>
-
-        <Style TargetType="ListBox">
-            <Setter Property="Background" Value="{DynamicResource ListBoxBackgroundBrush}"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextForegroundBrush}"/>
-            <Setter Property="BorderThickness" Value="0"/>
-        </Style>
-
-        <!-- Шаблон для аватарок -->
-        <DataTemplate x:Key="AvatarTemplate">
-            <Border Width="{Binding Size}" Height="{Binding Size}" CornerRadius="{Binding CornerRadius}">
-                <Image Source="{Binding ImageSource}" Stretch="UniformToFill"/>
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="5" ShadowDepth="1" Color="Black" Opacity="0.5"/>
-                </Border.Effect>
-            </Border>
-        </DataTemplate>
+        <!-- ...Ваши стили и шаблоны как раньше... -->
     </Window.Resources>
 
     <Grid>
@@ -55,14 +24,7 @@
         <!-- Левая панель - список чатов -->
         <Border Grid.Column="0" Background="{DynamicResource ControlBackgroundBrush}">
             <DockPanel>
-                <!-- Заголовок -->
-
-                <!--<Border DockPanel.Dock="Top" Background="{DynamicResource WindowBackgroundBrush}" Height="50">
-                    <TextBlock Text="Чаты" Foreground="{DynamicResource TextForegroundBrush}" 
-                               FontSize="18" FontWeight="Bold"
-                               VerticalAlignment="Center" Margin="15 0"/>
-                </Border>-->
-
+                <!-- Заголовок и кнопка добавления чата -->
                 <Border DockPanel.Dock="Top" Background="{DynamicResource WindowBackgroundBrush}" Height="50">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -72,11 +34,11 @@
                         <TextBlock Text="Чаты" Foreground="{DynamicResource TextForegroundBrush}" 
                             FontSize="18" FontWeight="Bold"
                             VerticalAlignment="Center" Margin="15,0"/>
-                        <Button x:Name="AddButton" Grid.Column="1" Width="32" Height="32" Command="{Binding AddChatCommand}"
-                            VerticalAlignment="Center"
-                            Background="{DynamicResource WindowBackgroundBrush}"
-                            BorderThickness="0"
-                            Cursor="Hand" Click="AddButton_Click">
+                        <Button Grid.Column="1" Width="32" Height="32" Command="{Binding AddChatCommand}"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource WindowBackgroundBrush}"
+                                BorderThickness="0"
+                                Cursor="Hand">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Grid>
@@ -87,6 +49,8 @@
                             </Button.Template>
                             <TextBlock Text="+" FontSize="30" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"  Foreground="{DynamicResource TextForegroundBrush}"/>
                         </Button>
+                        <Button Content="Обновить" Command="{Binding LoadChatsCommand}" Margin="228,9,10,11" Width="30" />
+
                     </Grid>
                 </Border>
 
@@ -96,8 +60,10 @@
                 </Border>
 
                 <!-- Список чатов -->
-                <ListBox x:Name="ChatsList" Background="Transparent" ItemsSource="{Binding Chats}">
-                    <ItemsControl ItemsSource="{Binding Messages}"/>
+                <ListBox x:Name="ChatsList"
+                         ItemsSource="{Binding Chats}"
+                         SelectedItem="{Binding SelectedChat, Mode=TwoWay}"
+                         Background="Transparent">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border Padding="10" Background="Transparent">
@@ -107,24 +73,19 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="60"/>
                                     </Grid.ColumnDefinitions>
-
-                                    <Grid Grid.Column="0">
-                                        <ContentControl Content="{Binding Avatar}" 
-                                                      ContentTemplate="{StaticResource AvatarTemplate}"
-                                                      HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                        <Ellipse Width="10" Height="10" Fill="{Binding StatusColor}" 
-                                                 HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                                 Margin="0 0 2 2"/>
-                                    </Grid>
-
+                                    <!-- Аватарка -->
+                                    <Ellipse Grid.Column="0" Width="40" Height="40" Fill="#FFD0D0D0">
+                                        <!--<Ellipse.Fill>
+                                            <ImageBrush ImageSource="{Binding AvatarUrl}" />
+                                        </Ellipse.Fill>-->
+                                    </Ellipse>
+                                    <!-- Имя и последнее сообщение -->
                                     <StackPanel Grid.Column="1" Margin="10 0 0 0">
                                         <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextForegroundBrush}" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding LastMessage}" Foreground="#FFAAAAAA" 
-                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding LastMessage}" Foreground="#FFAAAAAA" TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
-
-                                    <TextBlock Grid.Column="2" Text="{Binding Time}" 
-                                               Foreground="#FF777777" HorizontalAlignment="Right"/>
+                                    <!-- Время -->
+                                    <TextBlock Grid.Column="2" Text="{Binding Time}" Foreground="#FF777777" HorizontalAlignment="Right"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>
@@ -148,22 +109,16 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="40"/>
                     </Grid.ColumnDefinitions>
-
                     <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
-                        <Grid Margin="10 0">
-                            <ContentControl Content="{Binding CurrentChatAvatar}" 
-                                          ContentTemplate="{StaticResource AvatarTemplate}"
-                                          Width="35" Height="35"/>
-                            <Ellipse Width="8" Height="8" Fill="#FF4CAF50" 
-                                     HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                     Margin="0 0 2 2"/>
-                        </Grid>
-                        <TextBlock Text="{Binding CurrentChatName}" Foreground="{DynamicResource TextForegroundBrush}" FontSize="16" 
+                        <Ellipse Width="35" Height="35" Fill="#FFD0D0D0" Margin="10 0">
+                            <!--<Ellipse.Fill>
+                                <ImageBrush ImageSource="{Binding SelectedChat.AvatarUrl}" />
+                            </Ellipse.Fill>-->
+                        </Ellipse>
+                        <TextBlock Text="{Binding SelectedChat.Name}" Foreground="{DynamicResource TextForegroundBrush}" FontSize="16" 
                                    VerticalAlignment="Center" Margin="10 0"/>
                     </StackPanel>
-
                     <Button Grid.Column="1" Content="⚙" FontSize="18" Background="Transparent" Command="{Binding OpenSettingsCommand}"
-                            x:Name="SettingsButton" Click="SettingsButton_Click"
                             Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Cursor="Hand"/>
                 </Grid>
             </Border>
@@ -176,11 +131,11 @@
                             <StackPanel Orientation="Horizontal" 
                                         HorizontalAlignment="{Binding Alignment}" 
                                         Margin="0 5">
-                                <Grid>
-                                    <ContentControl Content="{Binding SenderAvatar}" 
-                                                  ContentTemplate="{StaticResource AvatarTemplate}"
-                                                  Width="30" Height="30"/>
-                                </Grid>
+                                <Ellipse Width="30" Height="30" Fill="#FFD0D0D0">
+                                    <!--<Ellipse.Fill>
+                                        <ImageBrush ImageSource="{Binding SenderAvatarUrl}" />
+                                    </Ellipse.Fill>-->
+                                </Ellipse>
                                 <Border Background="{Binding MessageBackground}" 
                                         CornerRadius="10" 
                                         Padding="10" 
@@ -200,7 +155,6 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="80"/>
                     </Grid.ColumnDefinitions>
-
                     <TextBox Grid.Column="0" Text="{Binding MessageText, UpdateSourceTrigger=PropertyChanged}" 
                              VerticalContentAlignment="Center"
                              Background="{DynamicResource ControlBackgroundBrush}"
@@ -210,4 +164,4 @@
             </Border>
         </Grid>
     </Grid>
-</Window> 
+</Window>

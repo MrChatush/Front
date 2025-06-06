@@ -18,7 +18,7 @@ namespace WpfApp10
 
         private void OnRequestClose()
         {
-            var mainWindow = new MainWindow();
+            var mainWindow = new MainWindow(_viewModel.Token);
             mainWindow.Show();
             this.Close();
         }
