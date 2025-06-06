@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.ObjectModel;
@@ -36,9 +37,6 @@ namespace WpfApp10
                     _selectedChat = value;
                     OnPropertyChanged();
                     if (_selectedChat != null)
-                        
-                        _ = ReconnectSignalRAsync();
-                        _ = ConnectToHubAsync();
                         _ = JoinChatAsync(_selectedChat.Id);
 
                 }
@@ -56,7 +54,7 @@ namespace WpfApp10
                     _token = value;
                     OnPropertyChanged();
                     UpdateHttpClientAuthorization();
-                    _ = ReconnectSignalRAsync();
+                    _ = InitializeSignalRAsync();
                 }
             }
         }
@@ -68,11 +66,11 @@ namespace WpfApp10
             set { _currentChatName = value; OnPropertyChanged(); }
         }
 
-        private string _messageText = "1";
+        private string _messageText = "";
         public string MessageText
         {
             get => _messageText;
-            set { _messageText = value; OnPropertyChanged(); }
+            set { _messageText = value; OnPropertyChanged();}
         }
 
         public ICommand OpenSettingsCommand { get; }
@@ -89,8 +87,6 @@ namespace WpfApp10
             LoadChatsCommand = new RelayCommand(async _ => await LoadChatsAsync());
             OpenSettingsCommand = new RelayCommand(_ => OpenSettings());
             AddChatCommand = new RelayCommand(_ => AddChat());
-
-
         }
 
         private void OpenSettings()
@@ -116,8 +112,7 @@ namespace WpfApp10
                 BaseAddress = new Uri("https://localhost:7000/")
             };
         }
-
-        public async Task ReconnectSignalRAsync()
+        private async Task InitializeSignalRAsync()
         {
             if (_hubConnection != null)
             {
@@ -234,19 +229,19 @@ namespace WpfApp10
         {
             _hubConnection = new HubConnectionBuilder().WithUrl("https://localhost:7000/chat", options =>
             {
-                    options.AccessTokenProvider = () => Task.FromResult(Application.Current.Resources["JwtToken"] as string);
+                    options.AccessTokenProvider = () => Task.FromResult(Token);
                 }).WithAutomaticReconnect().Build();
 
-            _hubConnection.On<MessageDto>("ReceiveMessage", message =>
-            {
-                if (SelectedChat != null && message.ChatId == SelectedChat.Id)
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        Messages.Add(message);
-                    });
-                }
-            });
+            //_hubConnection.On<MessageDto>("ReceiveMessage", message =>
+            //{
+            //    if (SelectedChat != null && message.ChatId == SelectedChat.Id)
+            //    {
+            //        Application.Current.Dispatcher.Invoke(() =>
+            //        {
+            //            Messages.Add(message);
+            //        });
+            //    }
+            //});
 
             try
             {
@@ -265,13 +260,18 @@ namespace WpfApp10
 
             try
             {
-                await _hubConnection.InvokeAsync("SendMessageViaSignalRAsync", SelectedChat.Id, MessageText);
+                //if (_hubConnection.State != HubConnectionState.Connected)
+                //{
+                //    await _hubConnection.StartAsync();
+                //}
+                await _hubConnection.InvokeAsync("SendMessage", SelectedChat.Id, MessageText);
                 MessageText = string.Empty;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка отправки сообщения: " + ex.Message);
+                MessageBox.Show($"Ошибка отправки сообщения:\n{ex.GetType().Name}\n{ex.Message}\n{ex.StackTrace}{ex.Source}");
             }
+
         }
         public class ChatDto
         {
