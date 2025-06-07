@@ -146,8 +146,8 @@
 
                                 <Border Background="{Binding MessageBackground}" 
                             CornerRadius="10" 
-                            Padding="10" 
-                            Margin="10 0" 
+                            Padding="20 0" 
+                            Margin="15 0" 
                             MaxWidth="400">
                                     <TextBlock Text="{Binding Text}" 
                                    Foreground="{DynamicResource TextForegroundBrush}" 
