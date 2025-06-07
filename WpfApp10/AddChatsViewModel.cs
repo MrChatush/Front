@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Win32;
 using System;
 using System.ComponentModel;
 using System.IdentityModel.Tokens.Jwt;
@@ -14,6 +15,11 @@ public class AddChatsViewModel : INotifyPropertyChanged
 {
     private string _username;
     public event PropertyChangedEventHandler PropertyChanged;
+    public string ChatTitle { get; set; }
+    public string ChatAvatarPath { get; set; }
+    public ICommand SelectAvatarCommand { get; }
+ 
+
 
     public string Username
     {
@@ -36,8 +42,13 @@ public class AddChatsViewModel : INotifyPropertyChanged
         _hubConnection = hubConnection;
         _httpClient = httpClient;
         _token = token;
-        AddChatsCommand = new RelayCommand(async _ => await SendChatAsync()) ;
+        AddChatsCommand = new RelayCommand(async _ => await SendChatAsync());
+
+        SelectAvatarCommand = new RelayCommand(_ => SelectAvatar());
+        CloseCommand = new RelayCommand(_ => RequestClose?.Invoke());
     }
+    public ICommand CloseCommand { get; }
+
     public ICommand AddChatsCommand { get; }
 
     // Событие для закрытия окна
@@ -53,7 +64,7 @@ public class AddChatsViewModel : INotifyPropertyChanged
             var user1 = GetUserIdFromToken(_token);
             var user2 = await GetUserIdByUsernameAsync(Username);
             await _hubConnection.InvokeAsync("CreatePrivateChat", user1, user2,Username);
-            RequestClose.Invoke();
+            //RequestClose.Invoke();
         }
         catch (Exception ex)
         {
@@ -76,7 +87,6 @@ public class AddChatsViewModel : INotifyPropertyChanged
             response.EnsureSuccessStatusCode();
 
             var userId = await response.Content.ReadFromJsonAsync<int>();
-
             return userId;
         }
         catch (Exception ex)
@@ -113,6 +123,25 @@ public class AddChatsViewModel : INotifyPropertyChanged
         return 0; // Возвращаем 0, если не удалось извлечь userId
     }
 
+    private void SelectAvatar()
+    {
+        var openFileDialog = new OpenFileDialog()
+        {
+            Title = "Выберите файл аватара",
+            Filter = "Изображения (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp|Все файлы (*.*)|*.*",
+            CheckFileExists = true,
+            Multiselect = false
+        };
+
+        bool? result = openFileDialog.ShowDialog();
+
+        if (result == true)
+        {
+            ChatAvatarPath = openFileDialog.FileName;
+            OnPropertyChanged(nameof(ChatAvatarPath));
+        }
+    }
+
     private void OnAddChats()
     {
         // Здесь можно добавить логику добавления чата
@@ -132,4 +161,7 @@ public class AddChatsViewModel : INotifyPropertyChanged
             Username = username;
         }
     }
+
+
+
 }
