@@ -61,7 +61,7 @@ public class AddChatsViewModel : INotifyPropertyChanged
             //}
             var user1 = GetUserIdFromToken(_token);
             var user2 = await GetUserIdByUsernameAsync(Username);
-            await _hubConnection.InvokeAsync("CreatePrivateChat", user1, user2,Username);
+            await _hubConnection.InvokeAsync("CreatePrivateChat", user1, user2,Username,ChatTitle);
             //RequestClose.Invoke();
         }
         catch (Exception ex)

@@ -163,7 +163,19 @@ namespace WpfApp10
                 })
                 .WithAutomaticReconnect()
                 .Build();
-
+            _hubConnection.On<int, bool>("ReceiveUserOnlineStatus", (userId, isOnline) =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    // Находим приватный чат с этим пользователем
+                    var chatToUpdate = Chats.FirstOrDefault(c => !c.IsGroup && c.OtherUserId == userId);
+                    if (chatToUpdate != null)
+                    {
+                        chatToUpdate.IsOnline = isOnline;
+                    }
+                });
+                _ = LoadChatsAsync();
+            });
             _hubConnection.On<MessageDto>("ReceiveMessage", message =>
             {
                 if (SelectedChat != null && message.ChatId == SelectedChat.Id)
@@ -314,6 +326,7 @@ namespace WpfApp10
             public bool IsGroup { get; set; }
             public string AvatarUrl { get; set; }
             public bool IsOnline { get; set; }
+            public int? OtherUserId { get; set; }
         }
 
         public class MessageDto
