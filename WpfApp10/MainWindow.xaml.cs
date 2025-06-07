@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Net.Http;
 using System.Windows;
+using Microsoft.AspNetCore.SignalR.Client;
+using Newtonsoft.Json.Linq;
 
 namespace WpfApp10
 {
     public partial class MainWindow : Window
     {
+        private SettingsViewModel _settingsViewModel;
+
         private MainWindowViewModel ViewModel => DataContext as MainWindowViewModel;
 
         public MainWindow(string Token)
@@ -12,6 +17,7 @@ namespace WpfApp10
             InitializeComponent();
             DataContext = new MainWindowViewModel(Token);
 
+            // Подписка на событие очистки истории
             Loaded += MainWindow_Loaded;
             }
 

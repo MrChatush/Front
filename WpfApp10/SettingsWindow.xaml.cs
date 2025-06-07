@@ -1,13 +1,17 @@
-﻿using System.Windows;
+﻿using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Windows;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace WpfApp10
 {
     public partial class SettingsWindow : Window
     {
-        public SettingsWindow()
+        public SettingsWindow(HubConnection hubConnection, HttpClient httpClient, string token,int ChatId, Func<Task> Update)
         {
             InitializeComponent();
-            var vm = new SettingsViewModel();
+            var vm = new SettingsViewModel(hubConnection, httpClient, token,ChatId,Update);
             vm.CloseWindowAction = () => this.Close();
             vm.OpenProfileSettingsAction = () =>
             {

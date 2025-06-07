@@ -1,8 +1,16 @@
 ﻿using System;
 using System.ComponentModel;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using Microsoft.AspNetCore.SignalR.Client;
+using Newtonsoft.Json.Linq;
+using static WpfApp10.MainWindowViewModel;
 
 namespace WpfApp10
 {
@@ -10,9 +18,11 @@ namespace WpfApp10
     {
         private bool _notificationsEnabled;
         private bool _isDarkTheme = true;
-
+        private readonly HubConnection _hubConnection;
+        private readonly HttpClient _httpClient;
+        private readonly string _token;
         public event PropertyChangedEventHandler PropertyChanged;
-
+        private readonly Func<Task> _reloadChatMessages;
         public bool NotificationsEnabled
         {
             get => _notificationsEnabled;
@@ -49,12 +59,18 @@ namespace WpfApp10
         public Action OpenProfileSettingsAction { get; set; }
         public Action OpenAuthWindowAction { get; set; }
 
-        public SettingsViewModel()
+        public SettingsViewModel(HubConnection hubConnection, HttpClient httpClient, string token,int ChatId,Func<Task> Update)
         {
+            _hubConnection = hubConnection;
+            _httpClient = httpClient;
+            _token = token;
             ClearHistoryCommand = new RelayCommand(_ => ClearHistory());
             LogoutCommand = new RelayCommand(_ => Logout());
             OpenProfileSettingsCommand = new RelayCommand(_ => OpenProfileSettings());
+            CurrentChatId = ChatId;
+            _reloadChatMessages =Update;
         }
+
 
         private void ShowNotificationMessage()
         {
@@ -87,9 +103,24 @@ namespace WpfApp10
                 app.Resources["ListBoxBackgroundBrush"] = app.TryFindResource("LightListBoxBackground");
             }
         }
-
-        private void ClearHistory()
+        private int _currentChatId;
+        public int CurrentChatId
         {
+            get => _currentChatId;
+            set
+            {
+                if (_currentChatId != value)
+                {
+                    _currentChatId = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+
+        private async void ClearHistory()
+        {
+
             var result = MessageBox.Show("Вы уверены, что хотите очистить историю?",
                                          "Очистка истории",
                                          MessageBoxButton.YesNo,
@@ -97,9 +128,34 @@ namespace WpfApp10
 
             if (result == MessageBoxResult.Yes)
             {
-                MessageBox.Show("История очищена", "Настройки", MessageBoxButton.OK, MessageBoxImage.Information);
+                try
+                {
+                    // Предполагается, что у вас есть текущий ChatId, например, хранится в свойстве
+                    int currentChatId = CurrentChatId; // Реализуйте этот метод или передавайте chatId
+
+                    var request = new HttpRequestMessage(HttpMethod.Delete, $"api/messages/chat/{currentChatId}");
+                    request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
+
+                    var response = await _httpClient.SendAsync(request);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("История очищена", "Настройки", MessageBoxButton.OK, MessageBoxImage.Information);
+                        await _reloadChatMessages();
+                        // Можно дополнительно уведомить UI или обновить список сообщений
+                    }
+                    else
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show($"Ошибка при очистке истории: {errorContent}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Произошла ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
+      
 
         private void Logout()
         {
