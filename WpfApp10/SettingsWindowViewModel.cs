@@ -68,7 +68,7 @@ namespace WpfApp10
             LogoutCommand = new RelayCommand(_ => Logout());
             OpenProfileSettingsCommand = new RelayCommand(_ => OpenProfileSettings());
             CurrentChatId = ChatId;
-            _reloadChatMessages =Update;
+            _reloadChatMessages = Update;
         }
 
 

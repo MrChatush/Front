@@ -165,7 +165,19 @@ namespace WpfApp10
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        Messages.Add(message);
+                        // Если сообщение самое новое — добавляем в конец
+                        if (Messages.Count == 0 || message.SentAt <= Messages.Last().SentAt)
+                        {
+                            Messages.Add(message);
+                        }
+                        else
+                        {
+                            // Вставляем по порядку, если вдруг пришло старое сообщение
+                            int index = 0;
+                            while (index < Messages.Count && Messages[index].SentAt <= message.SentAt)
+                                index++;
+                            Messages.Insert(index, message);
+                        }
                     });
                 }
             });
@@ -186,6 +198,8 @@ namespace WpfApp10
                 MessageBox.Show("Ошибка подключения к SignalR: " + ex.Message);
             }
         }
+
+
 
         public async Task LoadChatsAsync()
         {
@@ -252,7 +266,7 @@ namespace WpfApp10
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     Messages.Clear();
-                    foreach (var msg in messages)
+                    foreach (var msg in messages.OrderBy(m => m.SentAt))
                         Messages.Add(msg);
                 });
 
@@ -263,6 +277,7 @@ namespace WpfApp10
                 MessageBox.Show("Ошибка при загрузке сообщений или присоединении к чату: " + ex.Message);
             }
         }
+
 
         private async Task SendMessageAsync()
         {

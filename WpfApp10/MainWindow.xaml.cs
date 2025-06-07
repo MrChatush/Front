@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Net.Http;
+using System.Collections.Specialized;
 using System.Windows;
-using Microsoft.AspNetCore.SignalR.Client;
-using Newtonsoft.Json.Linq;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace WpfApp10
 {
@@ -15,11 +15,14 @@ namespace WpfApp10
         public MainWindow(string Token)
         {
             InitializeComponent();
+
             DataContext = new MainWindowViewModel(Token);
 
             // Подписка на событие очистки истории
             Loaded += MainWindow_Loaded;
-            }
+            ((INotifyCollectionChanged)ViewModel.Messages).CollectionChanged += Messages_CollectionChanged;
+        }
+
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -59,5 +62,15 @@ namespace WpfApp10
             // Вызываем команду открытия настроек из VM
             ViewModel?.OpenSettingsCommand.Execute(null);
         }
+
+        private void Messages_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            //if (VisualTreeHelper.GetChild(MessagesControl, 0) is Border border &&
+            //    VisualTreeHelper.GetChild(border, 0) is ScrollViewer scrollViewer)
+            //{
+            //    scrollViewer.ScrollToEnd();
+            //}
+        }
+
     }
 }

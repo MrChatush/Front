@@ -60,10 +60,5 @@ namespace WpfApp10
                 _viewModel.Password = passwordBox.Password;
             }
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

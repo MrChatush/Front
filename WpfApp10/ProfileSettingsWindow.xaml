@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Настройки профиля" 
-        Height="400" 
+        Height="430" 
         Width="400"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
