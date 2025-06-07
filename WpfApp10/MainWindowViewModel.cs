@@ -99,9 +99,32 @@ namespace WpfApp10
 
         private void OpenSettings()
         {
-            var win = new SettingsWindow();
-            win.ShowDialog();
+            if (_selectedChat.Id != null)
+            {
+                var win = new SettingsWindow(_hubConnection, _httpClient, _token, _selectedChat.Id, UpdateMessages);
+                win.ShowDialog();
+            }
         }
+        public async Task UpdateMessages()
+        {
+            if (SelectedChat == null)
+                return;
+            try
+            {
+                var messages = await _httpClient.GetFromJsonAsync<MessageDto[]>($"api/messages?chatId={SelectedChat.Id}");
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Messages.Clear();
+                    foreach (var msg in messages)
+                        Messages.Add(msg);
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при обновлении сообщений: " + ex.Message);
+            }
+        }
+
         private void UpdateHttpClientAuthorization()
         {
             if (!string.IsNullOrEmpty(Token))
