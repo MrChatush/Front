@@ -110,7 +110,7 @@
                     <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
                         <Ellipse Width="35" Height="35" Margin="10 0">
                             <Ellipse.Fill>
-                                <ImageBrush ImageSource="{Binding SenderAvatarUrl}" />
+                                <ImageBrush ImageSource="{Binding SelectedChat.AvatarUrl}" />
                             </Ellipse.Fill>
                         </Ellipse>
                         <TextBlock Text="{Binding SelectedChat.Name}" Foreground="{DynamicResource TextForegroundBrush}" FontSize="16" 
