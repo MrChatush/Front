@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -47,7 +48,6 @@ namespace WpfApp10
             //    MessageBox.Show("Анлак");
             //}
         }
-
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
             // Вызываем команду добавления чата из VM

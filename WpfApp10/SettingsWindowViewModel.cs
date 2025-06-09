@@ -166,6 +166,7 @@ namespace WpfApp10
 
             if (result == MessageBoxResult.Yes)
             {
+
                 OpenAuthWindowAction?.Invoke();
                 CloseWindowAction?.Invoke();
             }
