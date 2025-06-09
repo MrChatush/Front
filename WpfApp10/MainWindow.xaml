@@ -74,7 +74,7 @@
                                     <!-- Аватарка -->
                                     <Ellipse Grid.Column="0" Width="40" Height="40">
                                         <Ellipse.Fill>
-                                            <ImageBrush ImageSource="{Binding SenderAvatarUrl}" />
+                                            <ImageBrush ImageSource="{Binding AvatarUrl}" />
                                         </Ellipse.Fill>
                                     </Ellipse>
                                     <!-- Имя и последнее сообщение -->
@@ -102,24 +102,27 @@
 
             <!-- Заголовок чата -->
             <Border Grid.Row="0" Background="{DynamicResource WindowBackgroundBrush}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="40"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
-                        <Ellipse Width="35" Height="35" Margin="10 0">
-                            <Ellipse.Fill>
-                                <ImageBrush ImageSource="{Binding SenderAvatarUrl}" />
-                            </Ellipse.Fill>
-                        </Ellipse>
-                        <TextBlock Text="{Binding SelectedChat.Name}" Foreground="{DynamicResource TextForegroundBrush}" FontSize="16" 
-                                   VerticalAlignment="Center" Margin="10 0"/>
-                    </StackPanel>
-                    <Button Grid.Column="1" Content="⚙" FontSize="18" Background="Transparent" Command="{Binding OpenSettingsCommand}"
-                            Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Cursor="Hand"/>
-                </Grid>
-            </Border>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="40"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
+            <Ellipse Width="35" Height="35" Margin="10 0">
+                <Ellipse.Fill>
+                    <ImageBrush ImageSource="{Binding SelectedChat.AvatarUrl}" />
+                </Ellipse.Fill>
+            </Ellipse>
+            <TextBlock Text="{Binding SelectedChat.Name}" 
+                       Foreground="{DynamicResource TextForegroundBrush}" 
+                       FontSize="16" 
+                       VerticalAlignment="Center" Margin="10 0"/>
+        </StackPanel>
+        <Button Grid.Column="1" Content="⚙" FontSize="18" Background="Transparent" Command="{Binding OpenSettingsCommand}"
+                Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Cursor="Hand"/>
+    </Grid>
+</Border>
+
 
             <!-- Сообщения -->
             <ScrollViewer Grid.Row="1" Padding="10">

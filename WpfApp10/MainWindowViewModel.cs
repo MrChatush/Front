@@ -304,7 +304,7 @@ namespace WpfApp10
             public int Id { get; set; }
             public string Name { get; set; }
             public bool IsGroup { get; set; }
-            public string SenderAvatarUrl { get; set; }
+            public string AvatarUrl { get; set; }
         }
 
         public class MessageDto
