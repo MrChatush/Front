@@ -322,7 +322,19 @@ namespace WpfApp10
             public string Name { get; set; }
             public bool IsGroup { get; set; }
             public string AvatarUrl { get; set; }
-            public bool IsOnline { get; set; }
+            private bool _isOnline;
+            public bool IsOnline
+            {
+                get => _isOnline;
+                set
+                {
+                    if (_isOnline != value)
+                    {
+                        _isOnline = value;
+                        OnPropertyChanged(nameof(IsOnline));
+                    }
+                }
+            }
             public int? OtherUserId { get; set; }
             public string LastMessage { get; set; }
             public string Time { get; set; }

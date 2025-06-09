@@ -151,7 +151,7 @@
                                     <TextBlock Text="{Binding Sender}" 
                                                Foreground="{DynamicResource TextForegroundBrush}" 
                                                FontWeight="Bold" 
-                                               FontSize="14"    
+                                               FontSize="14" 
                                                Margin="0 0 0 4"
                                                TextTrimming="CharacterEllipsis"
                                                MaxWidth="150" />
