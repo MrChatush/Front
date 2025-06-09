@@ -229,6 +229,7 @@
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="SettingsWindowViewModel.cs" />
+    <Compile Include="OnlineStatusToColorConverter.cs" />
     <Page Include="AddChats.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

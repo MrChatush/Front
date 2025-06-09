@@ -5,6 +5,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.Common;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
@@ -13,7 +14,9 @@ using System.Net.Http.Json;
 using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 
@@ -96,6 +99,8 @@ namespace WpfApp10
             AddChatCommand = new RelayCommand(_ => AddChat());
             _ = LoadChatsAsync();
         }
+
+        
 
         private void OpenSettings()
         {
@@ -299,12 +304,16 @@ namespace WpfApp10
             }
 
         }
-        public class ChatDto
+
+        
+
+        public class ChatDto : ObservableObject
         {
             public int Id { get; set; }
             public string Name { get; set; }
             public bool IsGroup { get; set; }
             public string AvatarUrl { get; set; }
+            public bool IsOnline { get; set; }
         }
 
         public class MessageDto
@@ -319,4 +328,5 @@ namespace WpfApp10
             public string Sender { get; set; }
         }
     }
+
 }

@@ -12,7 +12,7 @@
         Background="{DynamicResource WindowBackgroundBrush}">
 
     <Window.Resources>
-        <!-- ...Ваши стили и шаблоны как раньше... -->
+        <local:OnlineStatusToColorConverter x:Key="OnlineStatusToColorConverter"/>
     </Window.Resources>
 
     <Grid>
@@ -71,12 +71,24 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="60"/>
                                     </Grid.ColumnDefinitions>
-                                    <!-- Аватарка -->
-                                    <Ellipse Grid.Column="0" Width="40" Height="40">
-                                        <Ellipse.Fill>
-                                            <ImageBrush ImageSource="{Binding AvatarUrl}" />
-                                        </Ellipse.Fill>
-                                    </Ellipse>
+                                    <Grid Grid.Column="0" Width="40" Height="40">
+                                        <!-- Аватарка -->
+                                        <Ellipse Grid.Column="0" Width="40" Height="40">
+                                            <Ellipse.Fill>
+                                                <ImageBrush ImageSource="{Binding AvatarUrl}" />
+                                            </Ellipse.Fill>
+                                        </Ellipse>
+                                        <Ellipse Width="12" Height="12"
+                                         HorizontalAlignment="Right"
+                                         VerticalAlignment="Bottom"
+                                         Margin="0,0,2,2"
+                                         Stroke="White"
+                                         StrokeThickness="2">
+                                            <Ellipse.Fill>
+                                                <SolidColorBrush Color="{Binding IsOnline, Converter={StaticResource OnlineStatusToColorConverter}}" />
+                                            </Ellipse.Fill>
+                                        </Ellipse>
+                                    </Grid>
                                     <!-- Имя и последнее сообщение -->
                                     <StackPanel Grid.Column="1" Margin="10 0 0 0">
                                         <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextForegroundBrush}" FontWeight="Bold"/>
