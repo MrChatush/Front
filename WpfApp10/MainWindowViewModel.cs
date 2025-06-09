@@ -5,6 +5,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -83,7 +84,7 @@ namespace WpfApp10
         public ICommand AddChatCommand { get; }
         public ICommand SendMessageCommand { get; }
         public ICommand LoadChatsCommand { get; }
-
+        public ICommand WindowClosingCommand { get; }
         public MainWindowViewModel(string token)
         {
             InitializeHttpClient();
@@ -93,7 +94,44 @@ namespace WpfApp10
             LoadChatsCommand = new RelayCommand(async _ => await LoadChatsAsync());
             OpenSettingsCommand = new RelayCommand(_ => OpenSettings());
             AddChatCommand = new RelayCommand(_ => AddChat());
+            WindowClosingCommand = new RelayCommand(_ => OnWindowClosing());
             _ = LoadChatsAsync();
+        }
+        private async Task OnWindowClosing()
+        {
+            try
+            {
+                // Добавляем токен в заголовок Authorization, если требуется
+                if (!string.IsNullOrEmpty(_token))
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
+                }
+
+                // Формируем тело запроса
+                var logoutRequest = new { UserId = GetUserIdFromToken(_token) };
+
+                // Отправляем POST-запрос на /api/auth/logout
+                var response = await _httpClient.PostAsJsonAsync("/api/auth/logout", logoutRequest);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Успешный logout
+                    MessageBox.Show("Вы успешно вышли из системы.");
+
+                    // Очистка локальных данных
+                    _token = null;
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Ошибка выхода из системы: {error}");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при выходе из системы: {ex.Message}");
+            }
         }
 
         private void OpenSettings()

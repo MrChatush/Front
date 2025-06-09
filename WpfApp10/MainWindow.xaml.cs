@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace WpfApp10
 {
@@ -21,9 +23,21 @@ namespace WpfApp10
             // Подписка на событие очистки истории
             Loaded += MainWindow_Loaded;
             ((INotifyCollectionChanged)ViewModel.Messages).CollectionChanged += Messages_CollectionChanged;
+            this.Closing += MainWindow_Closing;
         }
 
+        private async void MainWindow_Closing(object sender, CancelEventArgs e)
+        {
+            // Вызвать метод обновления статуса пользователя на сервере
+            try
+            {
 
+            }
+            catch (Exception ex)
+            {
+                // Логирование ошибки, если нужно
+            }
+        }
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             //if (ViewModel != null)
