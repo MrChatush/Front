@@ -212,17 +212,17 @@ namespace WpfApp10
                 _ = LoadChatsAsync();
             });
 
-            _hubConnection.On<MessageDto>("ReceiveMessage", message =>
+            _hubConnection.On<MessageDto>("ReceiveMessage", async message =>
             {
                 message.SentAt = DateTime.Now;
                 if (SelectedChat != null && message.ChatId == SelectedChat.Id)
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        Messages.Add(message);
-                    });
+                    Application.Current.Dispatcher.Invoke(() => Messages.Add(message));
+                    if (message.SenderId != MyUserId && SelectedChat.Id == message.ChatId)
+                        await _hubConnection.InvokeAsync("MarkMessageAsRead", message.Id,message.ChatId);
                 }
             });
+
 
             _hubConnection.On<ChatDto>("NewChatCreated", chat => {
                 Application.Current.Dispatcher.Invoke(() =>
@@ -230,17 +230,15 @@ namespace WpfApp10
                     _ = LoadChatsAsync();
                 });
             });
-
-            //_hubConnection.On<int, int>("MessagesRead", (chatId, userId) =>
-            //{
-            //    Application.Current.Dispatcher.Invoke(() =>
-            //    {
-            //        foreach (var msg in Messages.Where(m => m.ChatId == chatId && m.SenderId != userId))
-            //        {
-            //            msg.IsRead = true;
-            //        }
-            //    });
-            //});
+            _hubConnection.On<int>("MessageRead", messageId =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var msg = Messages.FirstOrDefault(m => m.Id == messageId);
+                    if (msg != null)
+                        msg.IsRead = true;
+                });
+            });
 
             try
             {
@@ -319,7 +317,10 @@ namespace WpfApp10
                     foreach (var msg in messages.OrderBy(m => m.SentAt))
                         Messages.Add(msg);
                 });
-
+                foreach (var msg in Messages.Where(m => !m.IsRead && m.SenderId != MyUserId))
+                {
+                    await _hubConnection.InvokeAsync("MarkMessageAsRead", msg.Id, chatId);
+                }
                 await _hubConnection.InvokeAsync("JoinRoom", chatId);
                 //await _httpClient.PostAsync($"api/chats/markAsRead?chatId={chatId}", null);
             }
@@ -378,7 +379,20 @@ namespace WpfApp10
             public string SenderAvatarUrl { get; set; }
             public string Text { get; set; }
             public DateTime SentAt { get; set; }
-            public bool IsRead { get; set; }
+            private bool _isRead;
+            public bool IsRead
+            {
+                get => _isRead;
+                set
+                {
+                    if (_isRead != value)
+                    {
+                        _isRead = value;
+                        OnPropertyChanged(nameof(IsRead));
+                    }
+                }
+            }
+
             public string Sender { get; set; }
         }
     }
