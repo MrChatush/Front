@@ -65,7 +65,7 @@ namespace WpfApp10
             _httpClient = httpClient;
             _token = token;
             ClearHistoryCommand = new RelayCommand(_ => ClearHistory());
-            LogoutCommand = new RelayCommand(_ => Logout());
+            LogoutCommand = new RelayCommand(_ => LogoutAsync());
             OpenProfileSettingsCommand = new RelayCommand(_ => OpenProfileSettings());
             CurrentChatId = ChatId;
             _reloadChatMessages = Update;
@@ -157,7 +157,7 @@ namespace WpfApp10
         }
       
 
-        private void Logout()
+        private async Task LogoutAsync()
         {
             var result = MessageBox.Show("Вы действительно хотите выйти из аккаунта?",
                                          "Выход",
@@ -166,9 +166,64 @@ namespace WpfApp10
 
             if (result == MessageBoxResult.Yes)
             {
+                try
+                {
+                    // Добавляем токен в заголовок Authorization, если требуется
+                    if (!string.IsNullOrEmpty(_token))
+                    {
+                        _httpClient.DefaultRequestHeaders.Authorization =
+                            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
+                    }
+
+                    // Формируем тело запроса
+                    var logoutRequest = new { UserId = GetUserIdFromToken(_token) };
+
+                    // Отправляем POST-запрос на /api/auth/logout
+                    var response = await _httpClient.PostAsJsonAsync("/api/auth/logout", logoutRequest);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Успешный logout
+                        MessageBox.Show("Вы успешно вышли из системы.");
+                    }
+                    else
+                    {
+                        var error = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show($"Ошибка выхода из системы: {error}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при выходе из системы: {ex.Message}");
+                }
                 OpenAuthWindowAction?.Invoke();
                 CloseWindowAction?.Invoke();
             }
+        }
+
+        private object GetUserIdFromToken(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                return 0;
+
+            var handler = new JwtSecurityTokenHandler();
+
+            try
+            {
+                var jwtToken = handler.ReadJwtToken(token);
+                var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId");
+
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    return userId;
+                }
+            }
+            catch
+            {
+                // Ошибка при парсинге токена
+            }
+
+            return 0;
         }
 
         private void OpenProfileSettings()
