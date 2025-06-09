@@ -19,13 +19,15 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-
 namespace WpfApp10
 {
-    public class MainWindowViewModel : ObservableObject // ObservableObject реализует INotifyPropertyChanged (можно реализовать вручную)
+    public class MainWindowViewModel : ObservableObject
     {
-        private  HttpClient _httpClient;
+        private HttpClient _httpClient;
         private HubConnection _hubConnection;
+        private static int _myUserId;
+
+        public static int MyUserId => _myUserId;
 
         public ObservableCollection<ChatDto> Chats { get; } = new ObservableCollection<ChatDto>();
         public ObservableCollection<MessageDto> Messages { get; } = new ObservableCollection<MessageDto>();
@@ -42,7 +44,6 @@ namespace WpfApp10
                     OnPropertyChanged();
                     if (_selectedChat != null)
                         _ = JoinChatAsync(_selectedChat.Id);
-
                 }
             }
         }
@@ -58,6 +59,7 @@ namespace WpfApp10
                     _token = value;
                     OnPropertyChanged();
                     UpdateHttpClientAuthorization();
+                    _myUserId = GetUserIdFromToken(_token);
                     _ = InitializeSignalRAsync();
                 }
             }
@@ -74,13 +76,7 @@ namespace WpfApp10
         public string MessageText
         {
             get => _messageText;
-            set { _messageText = value; OnPropertyChanged();}
-        }
-        private string _senderAvatarUrl;
-        public string SenderAvatarUrl
-        {
-            get => _senderAvatarUrl;
-            set { _senderAvatarUrl = value; OnPropertyChanged(); }
+            set { _messageText = value; OnPropertyChanged(); }
         }
 
         public ICommand OpenSettingsCommand { get; }
@@ -100,16 +96,15 @@ namespace WpfApp10
             _ = LoadChatsAsync();
         }
 
-        
-
         private void OpenSettings()
         {
-            if (_selectedChat.Id != null)
+            if (_selectedChat?.Id != null)
             {
                 var win = new SettingsWindow(_hubConnection, _httpClient, _token, _selectedChat.Id, UpdateMessages);
                 win.ShowDialog();
             }
         }
+
         public async Task UpdateMessages()
         {
             if (SelectedChat == null)
@@ -141,6 +136,7 @@ namespace WpfApp10
                 _httpClient.DefaultRequestHeaders.Authorization = null;
             }
         }
+
         private void InitializeHttpClient()
         {
             _httpClient = new HttpClient
@@ -148,6 +144,7 @@ namespace WpfApp10
                 BaseAddress = new Uri("https://localhost:7000/")
             };
         }
+
         private async Task InitializeSignalRAsync()
         {
             if (_hubConnection != null)
@@ -163,11 +160,11 @@ namespace WpfApp10
                 })
                 .WithAutomaticReconnect()
                 .Build();
+
             _hubConnection.On<int, bool>("ReceiveUserOnlineStatus", (userId, isOnline) =>
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    // Находим приватный чат с этим пользователем
                     var chatToUpdate = Chats.FirstOrDefault(c => !c.IsGroup && c.OtherUserId == userId);
                     if (chatToUpdate != null)
                     {
@@ -176,20 +173,19 @@ namespace WpfApp10
                 });
                 _ = LoadChatsAsync();
             });
+
             _hubConnection.On<MessageDto>("ReceiveMessage", message =>
             {
                 if (SelectedChat != null && message.ChatId == SelectedChat.Id)
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        // Если сообщение самое новое — добавляем в конец
                         if (Messages.Count == 0 || message.SentAt <= Messages.Last().SentAt)
                         {
                             Messages.Add(message);
                         }
                         else
                         {
-                            // Вставляем по порядку, если вдруг пришло старое сообщение
                             int index = 0;
                             while (index < Messages.Count && Messages[index].SentAt <= message.SentAt)
                                 index++;
@@ -198,12 +194,23 @@ namespace WpfApp10
                     });
                 }
             });
+
             _hubConnection.On<ChatDto>("NewChatCreated", chat => {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     _ = LoadChatsAsync();
                 });
-               
+            });
+
+            _hubConnection.On<int, int>("MessagesRead", (chatId, userId) =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    foreach (var msg in Messages.Where(m => m.ChatId == chatId && m.SenderId != userId))
+                    {
+                        msg.IsRead = true;
+                    }
+                });
             });
 
             try
@@ -216,8 +223,6 @@ namespace WpfApp10
             }
         }
 
-
-
         public async Task LoadChatsAsync()
         {
             try
@@ -228,8 +233,7 @@ namespace WpfApp10
                     return;
                 }
 
-                int userId = GetUserIdFromToken(Token); // Реализуйте метод для получения userId из токена
-
+                int userId = GetUserIdFromToken(Token);
                 var chats = await _httpClient.GetFromJsonAsync<ChatDto[]>($"api/chats?userId={userId}");
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -254,7 +258,6 @@ namespace WpfApp10
             try
             {
                 var jwtToken = handler.ReadJwtToken(token);
-                // Ищем клейм с типом "userId"
                 var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId");
 
                 if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
@@ -267,7 +270,7 @@ namespace WpfApp10
                 // Ошибка при парсинге токена
             }
 
-            return 0; // Возвращаем 0, если не удалось извлечь userId
+            return 0;
         }
 
         private void AddChat()
@@ -275,6 +278,7 @@ namespace WpfApp10
             var win = new AddChats(_hubConnection, _httpClient, _token);
             win.ShowDialog();
         }
+
         private async Task JoinChatAsync(int chatId)
         {
             try
@@ -288,13 +292,13 @@ namespace WpfApp10
                 });
 
                 await _hubConnection.InvokeAsync("JoinRoom", chatId);
+                await _httpClient.PostAsync($"api/chats/markAsRead?chatId={chatId}", null);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Ошибка при загрузке сообщений или присоединении к чату: " + ex.Message);
             }
         }
-
 
         private async Task SendMessageAsync()
         {
@@ -303,10 +307,6 @@ namespace WpfApp10
 
             try
             {
-                //if (_hubConnection.State != HubConnectionState.Connected)
-                //{
-                //    await _hubConnection.StartAsync();
-                //}
                 await _hubConnection.InvokeAsync("SendMessage", SelectedChat.Id, MessageText);
                 MessageText = string.Empty;
             }
@@ -314,10 +314,7 @@ namespace WpfApp10
             {
                 MessageBox.Show($"Ошибка отправки сообщения:\n{ex.GetType().Name}\n{ex.Message}\n{ex.StackTrace}{ex.Source}");
             }
-
         }
-
-        
 
         public class ChatDto : ObservableObject
         {
@@ -327,9 +324,11 @@ namespace WpfApp10
             public string AvatarUrl { get; set; }
             public bool IsOnline { get; set; }
             public int? OtherUserId { get; set; }
+            public string LastMessage { get; set; }
+            public string Time { get; set; }
         }
 
-        public class MessageDto
+        public class MessageDto : ObservableObject
         {
             public int Id { get; set; }
             public int ChatId { get; set; }
@@ -342,4 +341,64 @@ namespace WpfApp10
         }
     }
 
+    public class BoolToReadConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return (bool)value ? "✓✓" : "✓";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class BoolToColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return (bool)value ? Brushes.Blue : Brushes.Gray;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class AlignmentConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int senderId && parameter is int myUserId)
+            {
+                return senderId == myUserId ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+            }
+            return HorizontalAlignment.Left;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class MessageBackgroundConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int senderId && parameter is int myUserId)
+            {
+                return senderId == myUserId ? new SolidColorBrush(Color.FromRgb(30, 109, 217)) :
+                                             new SolidColorBrush(Color.FromRgb(60, 60, 60));
+            }
+            return new SolidColorBrush(Color.FromRgb(60, 60, 60));
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
