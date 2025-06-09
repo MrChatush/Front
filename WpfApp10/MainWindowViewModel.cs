@@ -176,21 +176,12 @@ namespace WpfApp10
 
             _hubConnection.On<MessageDto>("ReceiveMessage", message =>
             {
+                message.SentAt = DateTime.Now;
                 if (SelectedChat != null && message.ChatId == SelectedChat.Id)
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        if (Messages.Count == 0 || message.SentAt <= Messages.Last().SentAt)
-                        {
-                            Messages.Add(message);
-                        }
-                        else
-                        {
-                            int index = 0;
-                            while (index < Messages.Count && Messages[index].SentAt <= message.SentAt)
-                                index++;
-                            Messages.Insert(index, message);
-                        }
+                        Messages.Add(message);
                     });
                 }
             });
@@ -202,16 +193,16 @@ namespace WpfApp10
                 });
             });
 
-            _hubConnection.On<int, int>("MessagesRead", (chatId, userId) =>
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    foreach (var msg in Messages.Where(m => m.ChatId == chatId && m.SenderId != userId))
-                    {
-                        msg.IsRead = true;
-                    }
-                });
-            });
+            //_hubConnection.On<int, int>("MessagesRead", (chatId, userId) =>
+            //{
+            //    Application.Current.Dispatcher.Invoke(() =>
+            //    {
+            //        foreach (var msg in Messages.Where(m => m.ChatId == chatId && m.SenderId != userId))
+            //        {
+            //            msg.IsRead = true;
+            //        }
+            //    });
+            //});
 
             try
             {
@@ -292,7 +283,7 @@ namespace WpfApp10
                 });
 
                 await _hubConnection.InvokeAsync("JoinRoom", chatId);
-                await _httpClient.PostAsync($"api/chats/markAsRead?chatId={chatId}", null);
+                //await _httpClient.PostAsync($"api/chats/markAsRead?chatId={chatId}", null);
             }
             catch (Exception ex)
             {
@@ -310,6 +301,7 @@ namespace WpfApp10
                 await _hubConnection.InvokeAsync("SendMessage", SelectedChat.Id, MessageText);
                 MessageText = string.Empty;
             }
+
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка отправки сообщения:\n{ex.GetType().Name}\n{ex.Message}\n{ex.StackTrace}{ex.Source}");
