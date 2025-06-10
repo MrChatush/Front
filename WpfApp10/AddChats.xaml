@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WpfApp10"
         mc:Ignorable="d"
         Title="Добавить чат" 
-        Height="330" 
+        Height="200" 
         Width="350"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
@@ -54,30 +54,8 @@
                          Background="#FF2D2D2D"/>
 
                 <!-- Название чата -->
-                <TextBlock Text="Название чата"
-                           Foreground="{DynamicResource TextForegroundBrush}"
-                           Margin="0,0,0,2"
-                           FontSize="13"/>
-                <TextBox Text="{Binding ChatTitle, UpdateSourceTrigger=PropertyChanged}" 
-                         Foreground="{DynamicResource TextForegroundBrush}" 
-                         Margin="0 0 0 8"
-                         FontSize="14"
-                         Background="#FF2D2D2D"/>
 
                 <!-- Аватарка -->
-                <TextBlock Text="Аватар чата"
-                           Foreground="{DynamicResource TextForegroundBrush}"
-                           Margin="0,0,0,2"
-                           FontSize="13"/>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Image Source="{Binding ChatAvatarPath}" Width="40" Height="40" Margin="0,0,8,0"/>
-                    <Button Content="Выбрать файл"
-                            Command="{Binding SelectAvatarCommand}"
-                            Background="#FF1E6DD9"
-                            Foreground="{DynamicResource TextForegroundBrush}"
-                            Padding="8,2"
-                            FontSize="13"/>
-                </StackPanel>
             </StackPanel>
 
             <Border Grid.Row="2" Background="{DynamicResource ControlBackgroundBrush}" CornerRadius="0 0 10 10" Padding="5">

@@ -75,40 +75,6 @@
         <!-- Основные настройки -->
         <StackPanel Grid.Row="1" Margin="20">
             <!-- Уведомления -->
-            <Grid Margin="0,0,0,20">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="80"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="Уведомления" Grid.Column="0"/>
-                <ToggleButton Grid.Column="1"
-                              Width="40"
-                              Height="20"
-                              HorizontalAlignment="Right"
-                              IsChecked="{Binding NotificationsEnabled, Mode=TwoWay}">
-                    <ToggleButton.Template>
-                        <ControlTemplate TargetType="ToggleButton">
-                            <Border x:Name="Border" 
-                                    Background="#FF9E9E9E" 
-                                    CornerRadius="10">
-                                <Ellipse x:Name="Thumb" 
-                                         HorizontalAlignment="Left" 
-                                         VerticalAlignment="Center"
-                                         Width="16" 
-                                         Height="16" 
-                                         Margin="2"
-                                         Fill="White"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="Border" Property="Background" Value="#FF4CAF50"/>
-                                    <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </ToggleButton.Template>
-                </ToggleButton>
-            </Grid>
 
             <!-- Тема -->
             <Grid Margin="0,0,0,20">
@@ -147,9 +113,6 @@
             </Grid>
 
             <!-- Кнопка настроек профиля -->
-            <Button Content="Настройки профиля"
-                    Command="{Binding OpenProfileSettingsCommand}"
-                    Margin="0,0,0,20"/>
         </StackPanel>
 
         <!-- Кнопка очистки истории -->

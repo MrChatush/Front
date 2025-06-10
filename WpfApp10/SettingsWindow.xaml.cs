@@ -13,12 +13,6 @@ namespace WpfApp10
             InitializeComponent();
             var vm = new SettingsViewModel(hubConnection, httpClient, token,ChatId,Update);
             vm.CloseWindowAction = () => this.Close();
-            vm.OpenProfileSettingsAction = () =>
-            {
-                var profileWindow = new ProfileSettingsWindow();
-                profileWindow.Owner = this;
-                profileWindow.ShowDialog();
-            };
             vm.OpenAuthWindowAction = () =>
             {
                 var authWindow = new AuthWindow();

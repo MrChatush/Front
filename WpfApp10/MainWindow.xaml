@@ -62,15 +62,12 @@
                 </Border>
 
                 <!-- Поиск -->
-                <Border DockPanel.Dock="Top" Background="{DynamicResource ListBoxBackgroundBrush}" Padding="10">
-                    <TextBox Text="Поиск..." Foreground="#FFAAAAAA"/>
-                </Border>
 
                 <!-- Список чатов -->
                 <ListBox x:Name="ChatsList"
                          ItemsSource="{Binding Chats}"
                          SelectedItem="{Binding SelectedChat, Mode=TwoWay}"
-                         Background="Transparent">
+                         Background="Transparent" Height="518" Width="292">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border Padding="10" Background="Transparent">
