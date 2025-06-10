@@ -18,8 +18,6 @@ public class AddChatsViewModel : INotifyPropertyChanged
     public string ChatTitle { get; set; }
     public string ChatAvatarPath { get; set; }
     public ICommand SelectAvatarCommand { get; }
- 
-
 
     public string Username
     {
@@ -63,7 +61,7 @@ public class AddChatsViewModel : INotifyPropertyChanged
             //}
             var user1 = GetUserIdFromToken(_token);
             var user2 = await GetUserIdByUsernameAsync(Username);
-            await _hubConnection.InvokeAsync("CreatePrivateChat", user1, user2,Username);
+            await _hubConnection.InvokeAsync("CreatePrivateChat", user1, user2,Username,ChatTitle);
             //RequestClose.Invoke();
         }
         catch (Exception ex)
@@ -83,7 +81,6 @@ public class AddChatsViewModel : INotifyPropertyChanged
                 // Пользователь не найден — возвращаем null
                 return null;
             }
-
             response.EnsureSuccessStatusCode();
 
             var userId = await response.Content.ReadFromJsonAsync<int>();
@@ -142,12 +139,6 @@ public class AddChatsViewModel : INotifyPropertyChanged
         }
     }
 
-    private void OnAddChats()
-    {
-        // Здесь можно добавить логику добавления чата
-        RequestClose?.Invoke();
-    }
-
     protected void OnPropertyChanged([CallerMemberName] string propName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
     public class UserDto
@@ -161,7 +152,4 @@ public class AddChatsViewModel : INotifyPropertyChanged
             Username = username;
         }
     }
-
-
-
 }

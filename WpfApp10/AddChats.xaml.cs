@@ -11,6 +11,7 @@ namespace WpfApp10
             InitializeComponent();
             var vm = new AddChatsViewModel(hubConnection, httpClient, token);
             DataContext = vm;
+            vm.RequestClose += () => this.Close();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
